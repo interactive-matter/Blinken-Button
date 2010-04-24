@@ -20,6 +20,9 @@
  *
  *  Created on: 26.01.2010
  */
+//sometimes AVR Eclipse gets the frequency wrong
+#define F_CPU 8000000
+
 #include <avr/io.h>
 #include <avr/delay.h>
 #include <avr/pgmspace.h>

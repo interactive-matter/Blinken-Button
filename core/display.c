@@ -33,16 +33,6 @@
 //use dot correction?
 //#define DOT_CORRECTION
 
-#ifdef PNP_TRANSISTOR
-#define PORTB_DRAIN_MASK _BV(0) | _BV(1) | _BV(2) | _BV(3) | _BV(4)
-#define PORTC_DRAIN_MASK _BV(1) | _BV(2) | _BV(3) | _BV(4) | _BV(5)
-#define PORTD_DRAIN_MASK _BV(2) | _BV(3) | _BV(4) | _BV(5) | _BV(6) | _BV(7)
-#else
-#define PORTB_DRAIN_MASK _BV(1) | _BV(3) | _BV(4)
-#define PORTC_DRAIN_MASK _BV(1) | _BV(4)
-#define PORTD_DRAIN_MASK _BV(2) | _BV(5) | _BV(7)
-#endif
-
 //load the default sequence in the internal buffer
 //see RESERVED_SPRITES
 void
@@ -81,13 +71,15 @@ typedef struct
 //the sprite buffer for the calculated sprites
 display_line display_buffer[2][8];
 
+uint8_t bit_reverse(uint8_t x);
+
 void
 display_init()
 {
   //set all unused pins as inputs & and all display pins as output
-  DDRB = _BV(0) | _BV(1) | _BV(2) | _BV(3) | _BV(4);
-  DDRC = _BV(1) | _BV(2) | _BV(3) | _BV(4) | _BV(5);
-  DDRD = _BV(2) | _BV(3) | _BV(4) | _BV(5) | _BV(6) | _BV(7);
+  DDRB = 0x3;
+  DDRC = 0x3f;
+  DDRD = 0xff;
 
   //load the default sequence
   display_load_default_sequence();
@@ -115,122 +107,30 @@ display_load_sprite(uint8_t origin[])
   uint8_t column;
   for (column = 0; column < 8; column++)
     {
-      //set all row drains to high
-      uint8_t pb = PORTB_DRAIN_MASK;
-      uint8_t pc = PORTC_DRAIN_MASK;
-      uint8_t pd = PORTD_DRAIN_MASK;
+      //set all outputs to low
+      uint8_t pb = 0;
+      uint8_t pc = 0;
+      uint8_t pd = 0;
 
       //select the correct column
       //this will switch on the column transistor
-#ifdef PNP_TRANSISTOR
-      if (column == 0)
+      if (column < 6 )
         {
-          pc &= ~_BV(5);
+          pc |= _BV(column);
         }
-      else if (column == 1)
+      else
         {
-          pd &= ~_BV(6);
+          pb |= _BV(column) >> 6;
         }
-      else if (column == 2)
-        {
-          pb &= ~_BV(0);
-        }
-      else if (column == 3)
-        {
-          pc &= ~_BV(2);
-        }
-      else if (column == 4)
-        {
-          pb &= ~_BV(2);
-        }
-      else if (column == 5)
-        {
-          pc &= ~_BV(3);
-        }
-      else if (column == 6)
-        {
-          pd &= ~_BV(3);
-        }
-      else if (column == 7)
-        {
-          pd &= ~_BV(4);
-        };
-#else
-      if (column==0)
-        {
-          pc |= _BV(5);
-        }
-      else if (column==1)
-        {
-          pd |= _BV(6);
-        }
-      else if (column==2)
-        {
-          pb |= _BV(0);
-        }
-      else if (column==3)
-        {
-          pc |= _BV(2);
-        }
-      else if (column==4)
-        {
-          pb |= _BV(2);
-        }
-      else if (column==5)
-        {
-          pc |= _BV(3);
-        }
-      else if (column==6)
-        {
-          pd |= _BV(3);
-        }
-      else if (column==7)
-        {
-          pd |= _BV(4);
-        };
-#endif
+      //calculate the number of active bits
       display_buffer[number][column].num_bit = 0;
+      for (int i = 0; i < 8; i++) {
+        if (origin[column] & _BV(i)) {
+          display_buffer[number][column].num_bit++;
+        }
+      }
       //enable the drain for the selected lines
-      if (origin[0] & _BV(column))
-        {
-          pc &= ~_BV(1);
-          display_buffer[number][column].num_bit++;
-        }
-      if (origin[1] & _BV(column))
-        {
-          pd &= ~_BV(2);
-          display_buffer[number][column].num_bit++;
-        }
-      if (origin[2] & _BV(column))
-        {
-          pb &= ~_BV(4);
-          display_buffer[number][column].num_bit++;
-        }
-      if (origin[3] & _BV(column))
-        {
-          pc &= ~_BV(4);
-          display_buffer[number][column].num_bit++;
-        }
-      if (origin[4] & _BV(column))
-        {
-          pd &= ~_BV(5);
-          display_buffer[number][column].num_bit++;
-        }
-      if (origin[5] & _BV(column))
-        {
-          pb &= ~_BV(3);
-          display_buffer[number][column].num_bit++;
-        }
-      if (origin[6] & _BV(column))
-        {
-          pd &= ~_BV(7);
-          display_buffer[number][column].num_bit++;
-        }
-      if (origin[7] & _BV(column))
-        {
-          pb &= ~_BV(1);
-          display_buffer[number][column].num_bit++;
-        }
+      pd = bit_reverse(origin[column]);
 
       //save the calculated values to the sprite
       display_buffer[number][column].pb = pb;
@@ -274,6 +174,14 @@ void display_prog_led_disable(void)
   PROG_LED_PORT &= ~(PROG_LED_PIN);
 }
 
+uint8_t bit_reverse( uint8_t x )
+{
+    x = ((x >> 1) & 0x55) | ((x << 1) & 0xaa);
+    x = ((x >> 2) & 0x33) | ((x << 2) & 0xcc);
+    x = ((x >> 4) & 0x0f) | ((x << 4) & 0xf0);
+    return x;
+}
+
 void
 display_start_column_timer(void)
 {
@@ -290,9 +198,9 @@ ISR(TIMER0_COMPA_vect )
   //we want no other interrupts
   cli();
   //set all row drains to high
-  PORTB = PORTB_DRAIN_MASK;
-  PORTC = PORTC_DRAIN_MASK;
-  PORTD = PORTD_DRAIN_MASK;
+  PORTB = 0;
+  PORTC = 0;
+  PORTD = 0;
   //we strip the first two bits - they are for dimming
   //TODO do we get an 2 bit resolution too?
   uint8_t display_column = display_curr_column & 7;
@@ -306,16 +214,12 @@ ISR(TIMER0_COMPA_vect )
 #endif
     {
       //the set the ports line still off
-      PORTB = display_buffer[display_current_buffer][display_column].pb
-          | PORTB_DRAIN_MASK;
-      PORTC = display_buffer[display_current_buffer][display_column].pc
-          | PORTC_DRAIN_MASK;
-      PORTD = display_buffer[display_current_buffer][display_column].pd
-          | PORTD_DRAIN_MASK;
+      PORTB = 0;
+      PORTC = 0;
+      PORTD = display_buffer[display_current_buffer][display_column].pd;
       //the set the ports line enable
       PORTB = display_buffer[display_current_buffer][display_column].pb;
       PORTC = display_buffer[display_current_buffer][display_column].pc;
-      PORTD = display_buffer[display_current_buffer][display_column].pd;
     }
 
   //mask to max 8 + 2 dimming bits
@@ -355,4 +259,5 @@ ISR(TIMER0_COMPA_vect )
   //now other interrupts are fine
   sei();
 }
+
 
