@@ -138,7 +138,7 @@ HEXFORMAT=ihex
 CFLAGS=-I. $(INC) -g -mmcu=$(MCU) -O$(OPTLEVEL) \
 	-fpack-struct -fshort-enums -std=gnu99 \
 	-funsigned-bitfields -funsigned-char    \
-	-Wall -Wnostrict-prototypes               \
+	-Wall -Wstrict-prototypes               \
 	-Wa,-ahlms=$(firstword                  \
 	$(filter %.lst, $(<:.c=.lst)))
 

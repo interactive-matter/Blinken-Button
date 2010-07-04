@@ -27,7 +27,7 @@
 typedef void(*state_callback)(void);
 
 uint8_t state_register_task(state_callback callback);
-uint8_t state_register_state();
+uint8_t state_register_state(void);
 void state_process(void);
 uint8_t state_is_active(uint8_t state_number);
 void state_activate(uint8_t state_number);

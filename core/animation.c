@@ -99,7 +99,7 @@ void
 animation_clear_buffer(uint8_t buffer_number);
 
 void
-animation_show_char();
+animation_show_char(void);
 //finish displaying a message and go back to animation
 void
 animation_end_display_message(void);
@@ -114,7 +114,7 @@ void
 animation_load_next_sprite(void);
 
 void
-animation_init()
+animation_init(void)
 {
   //get a new random seed
   randomize_seed();
@@ -129,7 +129,7 @@ animation_init()
   state_animation_display_text_outro = state_register_state();
 
   //initialize the display
-  display_init(state_animation_text_render_state);
+  display_init();
   //prepare to load the first sequence
   animation_load_next_sequence();
   //load the first sprite immediately
@@ -167,7 +167,7 @@ animation_load_next_sequence(void)
   switch_sequence_interval = curr_sequence.display_length;
 }
 
-void animation_load_next_sprite() {
+void animation_load_next_sprite(void) {
   //we load the next sprite to the display
   display_load_sprite(animations_buffer[animation_sequence_next_sprite]);
   //and switch to it
@@ -193,7 +193,7 @@ animation_set_sequence(int8_t start, int8_t end, uint8_t speed)
 }
 
 void
-animation_load_message()
+animation_load_message(void)
 {
   uint8_t animation_message_number = get_random(MAX_MESSAGE);
   strcpy_P(message,
@@ -235,6 +235,9 @@ animation_end_display_message(void)
       animation_buffer_sequence_end, animation_buffer_sequence_speed);
   //the built in buffer was used for rendering the text
   //load_default_sequence();
+  //set status
+  state_deactivate(state_animation_displaying_text);
+  state_activate(state_animation_displaying_animation);
 }
 
 /*
@@ -243,7 +246,7 @@ animation_end_display_message(void)
  * Scrolls the screen to the left and draws new pixels on the right.
  */
 void
-animation_show_char()
+animation_show_char(void)
 {
   uint8_t i;
 

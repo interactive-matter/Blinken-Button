@@ -24,7 +24,7 @@
 #ifndef RANDOM_H_
 #define RANDOM_H_
 
-void randomize_seed();
+void randomize_seed(void);
 void set_seed(unsigned int value);
 unsigned int get_random(unsigned int upper_bound);
 

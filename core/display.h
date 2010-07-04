@@ -28,7 +28,7 @@
 #define PNP_TRANSISTOR
 
 //sprite display
-void display_init();
+void display_init(void);
 
 //display the next sprite
 void display_advance_buffer(void);
