@@ -35,7 +35,7 @@
 #include "core/display.h"
 
 //display test pattern
-//#define TEST_MODE
+#define TEST_MODE
 
 void
 animation_start_update_timer(void);
@@ -54,7 +54,7 @@ main(void)
 #ifndef TEST_MODE
   animation_init();
 #else
-  display_init(0);
+  display_init();
 #endif
 
   //and now start everything by enabling interrupts

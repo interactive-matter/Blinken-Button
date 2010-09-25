@@ -3,4 +3,12 @@
 .project
 Makefile
 Release/
-
+Debug/
+*.lst
+*.o
+*.amp
+.settings
+*.out
+*.out.map
+*.elf
+*.hex
