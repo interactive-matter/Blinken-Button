@@ -15,10 +15,19 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Blinken Button.  If not, see <http://www.gnu.org/licenses/>.
  *
  *
  *  Created on: 26.01.2010
+ *
+ *  The display is a pretty simple module. It consists of a timer (Timer 0)
+ *  which goes through the rows 0 to 7 and sets the ports to the corresponding
+ *  values to light the correct LEDs.
+ *  The values are stored directly as values used to apply to the ports.
+ *  The display has two buffers to store the output values. One buffer that is
+ *  currently displayed and one buffer where the next image can be stored.
+ *  While loading a sprite from an 8 byte array (each byte representing a row)
+ *  it gets converted to the port values to ensure a fast computation.
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -31,20 +40,35 @@
 #include "display.h"
 
 //use dot correction?
-//#define DOT_CORRECTION
 
-//load the default sequence in the internal buffer
-//see RESERVED_SPRITES
+/*
+ * Here we prototype some private functions we only need in this module.
+ * Therefore we define them here and not in the include file
+ */
+
+/*
+ * load the default sequence in the internal buffer
+ * see RESERVED_SPRITES
+ */
 void
 display_load_default_sequence(void);
-//internal functions
-//start the main render timer
+
+/*
+ * configure & start the main render timer - Timer 0
+ */
 void
 display_start_column_timer(void);
-//internal routine to load sprite
 
-//the current column, which is rendered
+/*
+ * the current column, which is rendered. It is stored in a register
+ * to ensure a fast update of the value - since it will get updated
+ * pretty often.
+ */
 register uint8_t display_curr_column asm("r2");
+
+/*
+ * Which of the buffers is currently displayed 0 or 1
+ */
 uint8_t display_current_buffer;
 //some small local display status
 register uint8_t display_status asm("r3");
@@ -54,12 +78,19 @@ register uint8_t display_status asm("r3");
 //to schedule advances for the test mode
 uint8_t advance_counter;
 
-//some our status for the prog led
-#define PROG_LED_PIN _BV(5)
-#define PROG_LED_PORT PORTB
-#define PROG_LED_DDR DDRB
-volatile uint8_t prog_led_status = 0;
-
+/**
+ * This structure contains the display optimized values of the current image,
+ * for one row.
+ * pb - the values to apply for Port B
+ * pc - the values to apply on Port C
+ * pd - the values to apply for Port D
+ * num_bit -  the number of bits in the current row
+ * this is used for the bit correction.
+ * If we light only one LED in a row it gets much brighter than if we display
+ * all 8 LEDs in a row, since the internal resistance of the battery is that high.
+ * (and the ATmega struggles to sink all the current).
+ * Therefore we light up one LED shorter than 8 LEDs - called dot correction.
+ */
 typedef struct
 {
   uint8_t pb;
@@ -68,13 +99,17 @@ typedef struct
   uint8_t num_bit;
 } display_line;
 
-//the sprite buffer for the calculated sprites
+/*
+ * This is the double bugffer for the images:
+ * 2 Buffers
+ * each 8 rows.
+ */
 display_line display_buffer[2][8];
 
 uint8_t bit_reverse(uint8_t x);
 
 void
-display_init()
+display_init(void)
 {
   //set all unused pins as inputs & and all display pins as output
   DDRB = 0x3;
@@ -148,7 +183,7 @@ display_advance_buffer(void)
   display_status |= DISPLAY_BUFFER_ADVANCE;
 }
 void
-display_load_default_sequence()
+display_load_default_sequence(void)
 {
   uint8_t default_load_buffer[8] =
     { 0, 0, 0, 0, 0, 0, 0, 0 };

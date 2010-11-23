@@ -32,7 +32,7 @@
 
 //to randomize zhe seed we read signals from the ADC and use the noise as seed
 void
-randomize_seed()
+randomize_seed(void)
 {
   unsigned int seed = 0;
   //switch on adc

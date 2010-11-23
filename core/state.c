@@ -50,7 +50,7 @@ state_register_task(state_callback callback)
 }
 
 uint8_t
-state_register_state()
+state_register_state(void)
 {
   if (registered_tasks < 7)
     {
