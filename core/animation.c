@@ -15,10 +15,13 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Blinken Button.  If not, see <http://www.gnu.org/licenses/>.
  *
  *
  *  Created on: 26.01.2010
+ *
+ *  The animation routines control the
+ *  TODO does it control the text mode too?
  */
 #include <stdint.h>
 #include <string.h>
@@ -34,14 +37,36 @@
 #include "random.h"
 #include "display.h"
 
-//at which speed do we scroll text
+/*
+ * The defines the spee text scrolls through the display
+ * Increase for slower scrolling, decrease for faster scrolling
+ * TOSO this is a wait time - is there a way to rework this?
+ */
 #define TEXT_SCROLL_SPEED 2
+/*
+ * This defines the internal size of the animation buffer.
+ * It contains several images of an animation in the main ram.
+ * TODO and why? can we get rid of that?
+ */
 #define BUFFER_SIZE 8
 
-//our main display buffer to load sprites into
-uint8_t animations_buffer[BUFFER_SIZE+1][8];
+/*
+ * Our main display buffer to load sprites into. To make size comparisons easier
+ * we allocateit one array bigger.
+ * TODO get rid of this!
+ */
+uint8_t animations_buffer[BUFFER_SIZE + 1][8];
 
-//state for displaying text & animations
+/*
+ * State for displaying text & animations.
+ * to coordinate the correct rendering states we must know if we are
+ * - displaying animations
+ * - displaying texts
+ * - do we need to render some text
+ * - is the text finished and we fill the remaining space
+ * - do we need to load a new sequence from flash
+ * - do we need to load a new sprite from flash
+ */
 //are we displaying text?
 volatile uint8_t state_animation_displaying_text;
 //are we displaying animations?
@@ -55,14 +80,25 @@ volatile uint8_t state_animation_next_sequence;
 //do we need to load the next sprite?
 volatile uint8_t state_animation_next_sprite;
 
-//the current sprite index
-//volatile register uint8_t curr_sprite asm("r2");
-//wait time to switch to the next sprite
+/*
+ * wait time to switch to the next sprite
+ * */
 volatile uint8_t animation_sprite_wait = 0;
-//the display speed of the current sequence
+/*
+ * The display speed of the current sequence
+ * This is set to 255. Each animation has it own animation speed later
+ */
 volatile uint8_t animation_sprite_speed = 255;
-//how fast do we want to change to the next sequence
+/*
+ * How fast do we want to change to the next sequence.
+ * This controls how fast we switch between the different animations and text.
+ */
 volatile uint8_t switch_sequence_interval;
+/*
+ * This variable holds the value how long we have waited to switch the
+ * animation sequence. If that variable hits the sequence interval we switch
+ * to the next sequence.
+ */
 volatile uint8_t switch_sequence_wait;
 //begin index of the current sequence
 volatile uint8_t animation_sequence_start;
@@ -120,10 +156,11 @@ animation_init(void)
   randomize_seed();
 
   //register the states
-  state_animation_text_render_state = state_register_task(
-      animation_text_render);
+  state_animation_text_render_state
+      = state_register_task(animation_text_render);
   state_animation_next_sprite = state_register_task(animation_load_next_sprite);
-  state_animation_next_sequence = state_register_task(animation_load_next_sequence);
+  state_animation_next_sequence = state_register_task(
+      animation_load_next_sequence);
   state_animation_displaying_text = state_register_state();
   state_animation_displaying_animation = state_register_state();
   state_animation_display_text_outro = state_register_state();
@@ -167,7 +204,9 @@ animation_load_next_sequence(void)
   switch_sequence_interval = curr_sequence.display_length;
 }
 
-void animation_load_next_sprite(void) {
+void
+animation_load_next_sprite(void)
+{
   //we load the next sprite to the display
   display_load_sprite(animations_buffer[animation_sequence_next_sprite]);
   //and switch to it
@@ -327,12 +366,14 @@ animation_text_render(void)
     {
       //we use alternating the first two sprites of the buffer
       animation_show_char();
-    } else {
+    }
+  else
+    {
       if (get_random(MESSAGE_PROBABILITY) == 1)
-         {
-           animation_load_message();
-           animation_display_message(message);
-         }
+        {
+          animation_load_message();
+          animation_display_message(message);
+        }
     }
 }
 

@@ -39,8 +39,6 @@
 #include "../flash-content/sprites.h"
 #include "display.h"
 
-//use dot correction?
-
 /*
  * Here we prototype some private functions we only need in this module.
  * Therefore we define them here and not in the include file
@@ -70,12 +68,23 @@ register uint8_t display_curr_column asm("r2");
  * Which of the buffers is currently displayed 0 or 1
  */
 uint8_t display_current_buffer;
-//some small local display status
+/*
+ * For the display we track an additional state:
+ *  - are we displaying a test pattern
+ *  - is the buffer locked
+ *  - should we switch buffers?
+ *  TODO: get rid of this ore make it clear!
+ */
+
 register uint8_t display_status asm("r3");
 #define DISPLAY_BUFFER_LOCKED _BV(0)
 #define DISPLAY_BUFFER_ADVANCE _BV(1)
 #define DISPLAY_TEST_MODE _BV(2)
-//to schedule advances for the test mode
+/*
+ * since the test mode is not controlled by timer 2
+ * we must track when to switch the images
+ * TODO: rework the test mode
+ */
 uint8_t advance_counter;
 
 /**
@@ -106,8 +115,13 @@ typedef struct
  */
 display_line display_buffer[2][8];
 
-uint8_t bit_reverse(uint8_t x);
+uint8_t
+bit_reverse(uint8_t x);
 
+/*
+ * This method initializes the display. It sets the output ports, loads the
+ * default sequence and starts the display timer (Timer 0).
+ */
 void
 display_init(void)
 {
@@ -124,12 +138,16 @@ display_init(void)
 
   //kick off the display timers to start rendering
   display_start_column_timer();
-
-  PROG_LED_DDR |= PROG_LED_PIN;
 }
 
-//load a sprite from the 8 bit buffer to the display struct
-//the display struct contains all port settings to increase the render speed
+/*
+ * This routines loads an 8x8 bit matrix (8 bytes) into the internal buffer in
+ * the format of the  display struct. The display struct contains all port
+ * settings to increase the render speed.
+ * The result is allways written into the unused buffer.
+ * While loading it is converted to direct bits for the ports. The unmber of
+ * activated bits (=LEDs) is coounte to enable some dot correction.
+ */
 void
 display_load_sprite(uint8_t origin[])
 {
@@ -137,19 +155,22 @@ display_load_sprite(uint8_t origin[])
   display_status &= ~(DISPLAY_TEST_MODE);
   //we select the next buffer by xoring either 0 or 1 with 1
   uint8_t number = display_current_buffer ^ 1;
-  //lock the buffer to signal the display to wait a tad until we finished
+  //lock the buffer to signal the display to wait with switching display buffers
+  //by that we got enough time to completely prepare the unused buffer.
   display_status |= DISPLAY_BUFFER_LOCKED;
   uint8_t column;
   for (column = 0; column < 8; column++)
     {
-      //set all outputs to low
+      //first we set all pins to low
       uint8_t pb = 0;
       uint8_t pc = 0;
       uint8_t pd = 0;
 
       //select the correct column
       //this will switch on the column transistor
-      if (column < 6 )
+      //bits 0 to 5 are set on the port c, bit 6-8
+      //is set on port c.
+      if (column < 6)
         {
           pc |= _BV(column);
         }
@@ -159,12 +180,15 @@ display_load_sprite(uint8_t origin[])
         }
       //calculate the number of active bits
       display_buffer[number][column].num_bit = 0;
-      for (int i = 0; i < 8; i++) {
-        if (origin[column] & _BV(i)) {
-          display_buffer[number][column].num_bit++;
+      for (int i = 0; i < 8; i++)
+        {
+          if (origin[column] & _BV(i))
+            {
+              display_buffer[number][column].num_bit++;
+            }
         }
-      }
       //enable the drain for the selected lines
+      //TODO do we still need this
       pd = bit_reverse(origin[column]);
 
       //save the calculated values to the sprite
@@ -176,12 +200,23 @@ display_load_sprite(uint8_t origin[])
   display_status &= ~(DISPLAY_BUFFER_LOCKED);
 }
 
-//switch to the next buffer
+/*
+ * Switch buffers.
+ * This enables the rendering of the previously unused buffer (hopefully with
+ * a new image) and frees the previuosly rendered buffer for writing to it.
+ * The switching of the buffers is done by the display timer. Since only the
+ * display timer knows when it does not need the buffer any longer.
+ */
 void
 display_advance_buffer(void)
 {
   display_status |= DISPLAY_BUFFER_ADVANCE;
 }
+
+/*
+ * Loads the test pattern.
+ * TODO come up with a better test pattern solution!
+ */
 void
 display_load_default_sequence(void)
 {
@@ -197,26 +232,25 @@ display_load_default_sequence(void)
   display_current_buffer = 0;
 }
 
-void display_prog_led_enable(void)
+/*
+ * The PCB layout renders the images ###spiegelverkehrt##. Therefor we have to
+ * mirror the data in software Ð easier than doing it in hardware.
+ * #TODO needed?
+ */
+uint8_t
+bit_reverse(uint8_t x)
 {
-  prog_led_status = -1;
-  PROG_LED_PORT |= PROG_LED_PIN;
+  x = ((x >> 1) & 0x55) | ((x << 1) & 0xaa);
+  x = ((x >> 2) & 0x33) | ((x << 2) & 0xcc);
+  x = ((x >> 4) & 0x0f) | ((x << 4) & 0xf0);
+  return x;
 }
 
-void display_prog_led_disable(void)
-{
-  prog_led_status = 0;
-  PROG_LED_PORT &= ~(PROG_LED_PIN);
-}
-
-uint8_t bit_reverse( uint8_t x )
-{
-    x = ((x >> 1) & 0x55) | ((x << 1) & 0xaa);
-    x = ((x >> 2) & 0x33) | ((x << 2) & 0xcc);
-    x = ((x >> 4) & 0x0f) | ((x << 4) & 0xf0);
-    return x;
-}
-
+/*
+ * Configures the column timer (Timer 0).
+ * TODO how much kHz?
+ * why btw OCR0A 200?
+ */
 void
 display_start_column_timer(void)
 {
@@ -228,6 +262,17 @@ display_start_column_timer(void)
   OCR0A = 200;
 }
 
+/*
+ * The overflow event for Timer 0.
+ * This is the heart of the display routine. It is triggered every time Timer 0
+ * hits OCR0A as upper limit.
+ * The timer interrupt reoutine does the following:
+ * - it disables all interrupts to be uninterrupted by other interrupts
+ * - it renders the next row and increases the row counter
+ * - if needed it switches the display buffer
+ * - it enables all the interrupts again
+ * TODO remove test mode
+ */
 ISR(TIMER0_COMPA_vect )
 {
   //we want no other interrupts
@@ -239,14 +284,13 @@ ISR(TIMER0_COMPA_vect )
   //we strip the first two bits - they are for dimming
   //TODO do we get an 2 bit resolution too?
   uint8_t display_column = display_curr_column & 7;
-#ifdef DOT_CORRECTION
-  if ((display_curr_column & 8) && !(display_buffer[current_buffer][display_column].num_bit & 0xFC))
+  if ((display_curr_column & 8)
+      && !(display_buffer[display_current_buffer][display_column].num_bit & 0xFC))
     {
       //do nothing - disable
       ;
     }
   else
-#endif
     {
       //the set the ports line still off
       PORTB = 0;
@@ -282,17 +326,7 @@ ISR(TIMER0_COMPA_vect )
           display_status &= ~(DISPLAY_BUFFER_ADVANCE);
         }
     }
-
-  if (prog_led_status)
-    {
-      PROG_LED_PORT |= PROG_LED_PIN;
-    }
-  else
-    {
-      PROG_LED_PORT &= ~(PROG_LED_PIN);
-    }
   //now other interrupts are fine
   sei();
 }
-
 
