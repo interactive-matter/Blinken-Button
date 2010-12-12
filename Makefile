@@ -17,20 +17,28 @@
 #  along with Blinken Buttons for Beginners.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# This is a prototype Makefile. Modify it according to your needs.
-# You should at least check the settings for
+# This are the programming options. Be sure to adapt it to your programmer and
+# the port the programmer is connected to.
+# PROGRAMMER ... Options to avrdude which define the hardware you use for
+#                uploading to the AVR and the interface where this hardware
+#                is connected.
+# PROGRAMMER_PORT ...  the port the programmer is attached to. This is highly 
+#                dependent on your programmer and operating system.
+#                This settings works for my mac
+PROGRAMMER = stk500v2
+PROGRAMMER_PORT = /dev/tty.usbserial-A7005tiM
+
+# This are the hardware settings for the Blinken Buttons for Beginners. There is
+# normally no need tho change these (or anything below) (if you do not change 
+# the hardware of the Blinken Buttons for Beginners, what is quite improbable).
 # DEVICE ....... The AVR device you compile for
 # CLOCK ........ Target AVR clock rate in Hertz
 # OBJECTS ...... The object files created from your source files. This list is
 #                usually the same as the list of source files with suffix ".o".
-# PROGRAMMER ... Options to avrdude which define the hardware you use for
-#                uploading to the AVR and the interface where this hardware
-#                is connected.
 # FUSES ........ Parameters for avrdude to flash the fuses appropriately.
 
 DEVICE     = atmega168
 CLOCK      = 8000000
-PROGRAMMER = -c stk500v2 -P avrdoper
 OBJECTS    = main.o core/animation.o core/display.o core/random.o core/state.o flash-content/sprites.o 
 FUSES      = Ulfuse:w:0xe2:m -Uhfuse:w:0xdf:m -Uefuse:w:0x1:m
 # ATMega8 fuse bits (fuse bits for other devices are different!):
@@ -73,7 +81,7 @@ FUSES      = Ulfuse:w:0xe2:m -Uhfuse:w:0xdf:m -Uefuse:w:0x1:m
 
 # Tune the lines below only if you know what you are doing:
 
-AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
+AVRDUDE = avrdude -c $(PROGRAMMER) -p $(DEVICE) -P $(PROGRAMMER_PORT)
 COMPILE = avr-gcc -Wall -Os -fpack-struct -fshort-enums -std=gnu99 -funsigned-char -funsigned-bitfields -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 
 # symbolic targets:
