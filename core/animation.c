@@ -38,7 +38,7 @@
 #include "display.h"
 
 /*
- * The defines the spee text scrolls through the display
+ * The defines the speed text scrolls through the display
  * Increase for slower scrolling, decrease for faster scrolling
  * TOSO this is a wait time - is there a way to rework this?
  */
@@ -52,7 +52,8 @@
 
 /*
  * Our main display buffer to load sprites into. To make size comparisons easier
- * we allocateit one array bigger.
+ * we allocate it one array bigger. Else we would have to use clumpsy
+ * BUFFER_SIZE+1 calculation all through the code.
  * TODO get rid of this!
  */
 uint8_t animations_buffer[BUFFER_SIZE + 1][8];
@@ -112,7 +113,18 @@ uint8_t animation_buffer_sequence_start;
 uint8_t animation_buffer_sequence_end;
 uint8_t animation_buffer_sequence_speed;
 
-//variables for displaying messages
+/*
+ * variables for displaying messages.
+ * Basically
+ *  msg_buffer holds the pointer to the actual message
+ *  message_length is the length of the currently displayed message
+ *  message_pointer points to the currently displayed character of the message
+ *  message_char_pointer is the current position in the character, currently
+ *   displayed (i.e. going from 0 to 3 for a 4 column character)
+ *  message_char_length is the length of the currently displayed char
+ *  message_active_char holds the numerical value of the current character to
+ *   read it from flash memory
+ */
 char* msg_buffer;
 uint8_t message_length;
 uint8_t message_pointer;
@@ -120,6 +132,10 @@ uint8_t message_char_pointer;
 uint8_t message_char_length;
 uint8_t message_active_char;
 
+/*
+ * This are prototypes for functions we use in this file but we do not want to
+ * make them accessible for others - since they are internal
+ */
 //start the timer for switching between animations
 void
 animation_start_animation_timer(void);
@@ -139,16 +155,20 @@ animation_show_char(void);
 //finish displaying a message and go back to animation
 void
 animation_end_display_message(void);
-
+//do everything to render the actual text
 void
 animation_text_render(void);
-
+//load the next animation sequence fro flash
 void
 animation_load_next_sequence(void);
-
+//load the next sprite from flash memory
 void
 animation_load_next_sprite(void);
 
+/*
+ * This functions set up everything for the animation routine. It needs to be
+ * calles before the 'big' loop routine kicks in.
+ */
 void
 animation_init(void)
 {
@@ -185,8 +205,10 @@ animation_load_next_sequence(void)
 
   //select the next sequence randomly
   uint8_t animation_sequence_number = get_random(MAX_SEQUENCE);
-  //buffer for loading a sequence
+  //buffer for loading a sequence (all information for the sequence)
+  //like legth and so on
   _sequence_struct curr_sequence;
+  //copy the sequence from flash to the buffer in the previous line
   memcpy_P(&curr_sequence, &sequences[animation_sequence_number],
       sizeof(_sequence_struct));
   //how many sprites we got in the sequence
@@ -199,11 +221,14 @@ animation_load_next_sequence(void)
       copy_to_buffer(predefined_sprites[index], animations_buffer[i]);
     }
   uint8_t speed = curr_sequence.display_speed;
+  //now set the sequence a s currently displayed sequence
   animation_set_sequence(0, sequence_length - 1, speed);
   //set the sequence display length
   switch_sequence_interval = curr_sequence.display_length;
 }
-
+/*
+ * This routine loads the next sprite from flash to load it into the display
+ */
 void
 animation_load_next_sprite(void)
 {
@@ -213,6 +238,13 @@ animation_load_next_sprite(void)
   display_advance_buffer();
 }
 
+/*
+ * This routine sets the current sequence.
+ *  start is in respect ot the internal buffer
+ *  end dito
+ *  speed is the wait time for the sprites - and by that controlling the speed
+ *   of the animation
+ */
 void
 animation_set_sequence(int8_t start, int8_t end, uint8_t speed)
 {
@@ -231,6 +263,10 @@ animation_set_sequence(int8_t start, int8_t end, uint8_t speed)
     }
 }
 
+/*
+ * select a message from flash memory to load it into the internal message
+ * buffer
+ */
 void
 animation_load_message(void)
 {
@@ -239,6 +275,12 @@ animation_load_message(void)
       (uint8_t*) pgm_read_word(&(messages[animation_message_number])));
 }
 
+/*
+ * Display a certain message.
+ * This is done by switching of the animation, switching to 'text mode'.
+ * Saving the current animation to later come back to it after we have
+ * finished displaying the text
+ */
 void
 animation_display_message(char* message)
 {
@@ -265,6 +307,11 @@ animation_display_message(char* message)
   state_activate(state_animation_text_render_state);
 }
 
+/*
+ * This routine finishes the displaying of message.
+ * It basically restores the previous animation and sets the state variables
+ * to display the animation again.
+ */
 void
 animation_end_display_message(void)
 {
@@ -280,9 +327,9 @@ animation_end_display_message(void)
 }
 
 /*
- * show_char
  * Displays the actual message.
- * Scrolls the screen to the left and draws new pixels on the right.
+ * Scrolls the screen to the left and draws new pixels for the current character
+ * on the right.
  */
 void
 animation_show_char(void)
@@ -358,6 +405,11 @@ animation_show_char(void)
   animation_load_next_sprite();
 }
 
+/*
+ * The animation_text_render manages all the high level animation stuff like
+ * managing the text rendering or if no text is rendered to decide according to
+ *
+ */
 void
 animation_text_render(void)
 {
@@ -367,8 +419,9 @@ animation_text_render(void)
       //we use alternating the first two sprites of the buffer
       animation_show_char();
     }
-  else
+  else //if we are not displaying a text message
     {
+      //according to a random value we decide if we want to display some text
       if (get_random(MESSAGE_PROBABILITY) == 1)
         {
           animation_load_message();
@@ -377,6 +430,9 @@ animation_text_render(void)
     }
 }
 
+/*
+ * A small routine to write 8 zeroes to the buffer.
+ */
 void
 animation_clear_buffer(uint8_t buffer_number)
 {
@@ -397,6 +453,12 @@ animation_clear_buffer(uint8_t buffer_number)
     }
 }
 
+/*
+ * This routine starts the update timer (Timer 1). it is used to switch between
+ * animations
+ * TODO how much kHz????
+ * TODO can't we unit those timers - they confuse me
+ */
 void
 animation_start_update_timer(void)
 {
@@ -407,6 +469,10 @@ animation_start_update_timer(void)
   TIMSK1 = _BV(TOIE1);
 }
 
+/*
+ * This is the actual timer routine which controls switching from one sprite
+ * to the other in a regular manner.
+ */
 ISR (TIMER1_OVF_vect)
 {
   //if we are displaying animations
