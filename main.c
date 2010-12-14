@@ -64,7 +64,7 @@
 #include "core/display.h"
 
 //display test pattern
-#define TEST_MODE
+//#define TEST_MODE
 
 /*
  * This is the main routine. The main routine gets executed when the ATmega powers up.

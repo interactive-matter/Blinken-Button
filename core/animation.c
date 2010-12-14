@@ -453,12 +453,6 @@ animation_clear_buffer(uint8_t buffer_number)
     }
 }
 
-/*
- * This routine starts the update timer (Timer 1). it is used to switch between
- * animations
- * TODO how much kHz????
- * TODO can't we unit those timers - they confuse me
- */
 void
 animation_start_update_timer(void)
 {
@@ -470,8 +464,10 @@ animation_start_update_timer(void)
 }
 
 /*
- * This is the actual timer routine which controls switching from one sprite
- * to the other in a regular manner.
+ * This routine starts the update timer (Timer 1). it is used to switch between
+ * animations. The timer runs at 0,4Hz (it is a 16 bit counter) to switch
+ * smoothly between the animations.
+ * TODO can't we unit those timers - they confuse me
  */
 ISR (TIMER1_OVF_vect)
 {
@@ -494,6 +490,10 @@ ISR (TIMER1_OVF_vect)
 
 }
 
+/*
+ * This is the 'animation timer' it switches between the different images of
+ * the animation to produce the uhm - animation. It runs at 30Hz
+ */
 void
 animation_start_animation_timer(void)
 {
@@ -504,6 +504,10 @@ animation_start_animation_timer(void)
   ASSR = 0;
 }
 
+/*
+ * This is the actual timer routine which controls switching from one sprite
+ * to the other in a regular manner.
+ */
 ISR(TIMER2_OVF_vect)
 {
   //we should not wait any longer
