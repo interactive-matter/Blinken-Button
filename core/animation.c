@@ -80,6 +80,8 @@ volatile uint8_t state_animation_display_text_outro;
 volatile uint8_t state_animation_next_sequence;
 //do we need to load the next sprite?
 volatile uint8_t state_animation_next_sprite;
+//this state is used to play an simple test pattern at the beginning
+volatile uint8_t state_animation_test_pattern;
 
 /*
  * wait time to switch to the next sprite
@@ -184,13 +186,13 @@ animation_init(void)
   state_animation_displaying_text = state_register_state();
   state_animation_displaying_animation = state_register_state();
   state_animation_display_text_outro = state_register_state();
+  state_animation_test_pattern = state_register_state();
+
+  //before we do anything we switch on the test pattern
+  state_activate(state_animation_test_pattern);
 
   //initialize the display
   display_init();
-  //prepare to load the first sequence
-  animation_load_next_sequence();
-  //load the first sprite immediately
-  animation_load_next_sprite();
   //and now start the display
   //start the update timer for switching animations
   animation_start_update_timer();
@@ -206,7 +208,7 @@ animation_load_next_sequence(void)
   //select the next sequence randomly
   uint8_t animation_sequence_number = get_random(MAX_SEQUENCE);
   //buffer for loading a sequence (all information for the sequence)
-  //like legth and so on
+  //like length and so on
   _sequence_struct curr_sequence;
   //copy the sequence from flash to the buffer in the previous line
   memcpy_P(&curr_sequence, &sequences[animation_sequence_number],
@@ -463,6 +465,9 @@ animation_start_update_timer(void)
   TIMSK1 = _BV(TOIE1);
 }
 
+volatile uint8_t test_row = 0;
+volatile uint8_t test_column=0;
+
 /*
  * This routine starts the update timer (Timer 1). it is used to switch between
  * animations. The timer runs at 0,4Hz (it is a 16 bit counter) to switch
@@ -471,6 +476,10 @@ animation_start_update_timer(void)
  */
 ISR (TIMER1_OVF_vect)
 {
+  //if the test state is active we first render the test pattern
+  if (state_is_active(state_animation_test_pattern)) {
+      return;
+  }
   //if we are displaying animations
   if (state_is_active(state_animation_displaying_animation))
     {
@@ -510,6 +519,38 @@ animation_start_animation_timer(void)
  */
 ISR(TIMER2_OVF_vect)
 {
+  if (state_is_active(state_animation_test_pattern)) {
+      //we simply let a dot go from top left to bottom right
+      //so we first clear the buffer
+      animation_clear_buffer(0);
+      //then we enable the dot in the current column & row
+      animations_buffer[0][test_row] = _BV(test_column);
+      //load it immediately to the display
+      display_load_sprite(animations_buffer[0]);
+      //and switch the buffer
+      display_advance_buffer();
+      //on to thenext column
+      test_column++;
+      //if we reached the last column
+      if (test_column>=8) {
+          //we switch to the next row
+          test_row++;
+          //and start at the first column again
+          test_column=0;
+          //and if we even reached the last row - we can end the test pattern
+          if (test_row>=8) {
+              //We leave the buffer in a proper state
+              animation_clear_buffer(0);
+              //and deactivate our test state an go over to 'normal' operation
+              state_deactivate(state_animation_test_pattern);
+              //prepare to load the first sequence
+              animation_load_next_sequence();
+              //load the first sprite immediately
+              animation_load_next_sprite();
+          }
+      }
+      return;
+  }
   //we should not wait any longer
   if (animation_sprite_wait == 0)
     {

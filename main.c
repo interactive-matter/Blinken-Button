@@ -63,9 +63,6 @@
 // display.c is responsible for rendering the images on the display.
 #include "core/display.h"
 
-//display test pattern
-//#define TEST_MODE
-
 /*
  * This is the main routine. The main routine gets executed when the ATmega powers up.
  * It initializes all components and keeps them running, by checking if one of the state
@@ -81,11 +78,7 @@ main(void)
    */
   power_all_disable();
   //now start the animations
-#ifndef TEST_MODE
   animation_init();
-#else
-  display_init();
-#endif
 
   /*
    * now we have initialized all components and can now switch to reactive mode.
