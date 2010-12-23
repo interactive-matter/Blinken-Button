@@ -115,9 +115,6 @@ typedef struct
  */
 display_line display_buffer[2][8];
 
-uint8_t
-bit_reverse(uint8_t x);
-
 /*
  * This method initializes the display. It sets the output ports, loads the
  * default sequence and starts the display timer (Timer 0).
@@ -189,7 +186,7 @@ display_load_sprite(uint8_t origin[])
         }
       //enable the drain for the selected lines
       //TODO do we still need this
-      pd = bit_reverse(origin[column]);
+      pd = origin[column];
 
       //save the calculated values to the sprite
       display_buffer[number][column].pb = pb;
@@ -230,20 +227,6 @@ display_load_default_sequence(void)
   copy_to_buffer(predefined_sprites[DEFAULT_2], default_load_buffer);
   display_load_sprite(default_load_buffer);
   display_current_buffer = 0;
-}
-
-/*
- * The PCB layout renders the images ###spiegelverkehrt##. Therefor we have to
- * mirror the data in software Ð easier than doing it in hardware.
- * #TODO needed?
- */
-uint8_t
-bit_reverse(uint8_t x)
-{
-  x = ((x >> 1) & 0x55) | ((x << 1) & 0xaa);
-  x = ((x >> 2) & 0x33) | ((x << 2) & 0xcc);
-  x = ((x >> 4) & 0x0f) | ((x << 4) & 0xf0);
-  return x;
 }
 
 /*
