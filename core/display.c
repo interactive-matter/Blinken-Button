@@ -45,13 +45,6 @@
  */
 
 /*
- * load the default sequence in the internal buffer
- * see RESERVED_SPRITES
- */
-void
-display_load_default_sequence(void);
-
-/*
  * configure & start the main render timer - Timer 0
  */
 void
@@ -70,7 +63,6 @@ register uint8_t display_curr_column asm("r2");
 uint8_t display_current_buffer;
 /*
  * For the display we track an additional state:
- *  - are we displaying a test pattern
  *  - is the buffer locked
  *  - should we switch buffers?
  *  TODO: get rid of this ore make it clear!
@@ -79,13 +71,6 @@ uint8_t display_current_buffer;
 register uint8_t display_status asm("r3");
 #define DISPLAY_BUFFER_LOCKED _BV(0)
 #define DISPLAY_BUFFER_ADVANCE _BV(1)
-#define DISPLAY_TEST_MODE _BV(2)
-/*
- * since the test mode is not controlled by timer 2
- * we must track when to switch the images
- * TODO: rework the test mode
- */
-uint8_t advance_counter;
 
 /**
  * This structure contains the display optimized values of the current image,
@@ -115,9 +100,6 @@ typedef struct
  */
 display_line display_buffer[2][8];
 
-uint8_t
-bit_reverse(uint8_t x);
-
 /*
  * This method initializes the display. It sets the output ports, loads the
  * default sequence and starts the display timer (Timer 0).
@@ -129,12 +111,6 @@ display_init(void)
   DDRB = 0x3;
   DDRC = 0x3f;
   DDRD = 0xff;
-
-  //load the default sequence
-  display_load_default_sequence();
-
-  //but until we get data we go to testmode
-  display_status |= DISPLAY_TEST_MODE;
 
   //kick off the display timers to start rendering
   display_start_column_timer();
@@ -151,8 +127,6 @@ display_init(void)
 void
 display_load_sprite(uint8_t origin[])
 {
-  //we leave the testmode
-  display_status &= ~(DISPLAY_TEST_MODE);
   //we select the next buffer by xoring either 0 or 1 with 1
   uint8_t number = display_current_buffer ^ 1;
   //lock the buffer to signal the display to wait with switching display buffers
@@ -189,7 +163,7 @@ display_load_sprite(uint8_t origin[])
         }
       //enable the drain for the selected lines
       //TODO do we still need this
-      pd = bit_reverse(origin[column]);
+      pd = origin[column];
 
       //save the calculated values to the sprite
       display_buffer[number][column].pb = pb;
@@ -210,46 +184,14 @@ display_load_sprite(uint8_t origin[])
 void
 display_advance_buffer(void)
 {
+  //TODO don't we have to obey the display locked?
   display_status |= DISPLAY_BUFFER_ADVANCE;
 }
 
 /*
- * Loads the test pattern.
- * TODO come up with a better test pattern solution!
- */
-void
-display_load_default_sequence(void)
-{
-  uint8_t default_load_buffer[8] =
-    { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-  display_current_buffer = 0;
-  copy_to_buffer(predefined_sprites[DEFAULT_1], default_load_buffer);
-  display_load_sprite(default_load_buffer);
-  display_current_buffer = 1;
-  copy_to_buffer(predefined_sprites[DEFAULT_2], default_load_buffer);
-  display_load_sprite(default_load_buffer);
-  display_current_buffer = 0;
-}
-
-/*
- * The PCB layout renders the images ###spiegelverkehrt##. Therefor we have to
- * mirror the data in software Ð easier than doing it in hardware.
- * #TODO needed?
- */
-uint8_t
-bit_reverse(uint8_t x)
-{
-  x = ((x >> 1) & 0x55) | ((x << 1) & 0xaa);
-  x = ((x >> 2) & 0x33) | ((x << 2) & 0xcc);
-  x = ((x >> 4) & 0x0f) | ((x << 4) & 0xf0);
-  return x;
-}
-
-/*
  * Configures the column timer (Timer 0).
- * TODO how much kHz?
- * why btw OCR0A 200?
+ * it 156.25kHz?
+ * TODO why OCR0A 200?
  */
 void
 display_start_column_timer(void)
@@ -257,7 +199,7 @@ display_start_column_timer(void)
   power_timer0_enable();
   //nothing to set on TCCR0A
   TCCR0A = 0;
-  TCCR0B = _BV(CS02) || _BV(CS00);
+  TCCR0B = _BV(CS01) || _BV(CS00);
   TIMSK0 = _BV(OCIE0A);
   OCR0A = 200;
 }
@@ -307,16 +249,6 @@ ISR(TIMER0_COMPA_vect )
 
   if (display_curr_column == 0)
     {
-      //we must support the testmode
-      if (display_status & DISPLAY_TEST_MODE)
-        {
-          advance_counter++;
-          if (advance_counter == 0)
-            {
-              display_status |= DISPLAY_BUFFER_ADVANCE;
-            }
-        }
-
       //if we reached the last column (and wrap) & we should advance to the next sprite display the next sprite
       if ((display_status & (DISPLAY_BUFFER_LOCKED | DISPLAY_BUFFER_ADVANCE))
           == DISPLAY_BUFFER_ADVANCE)

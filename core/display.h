@@ -30,17 +30,11 @@
 //sprite display
 void display_init(void);
 
-//display the next sprite
-void display_advance_buffer(void);
-
-void display_render(void);
-
-//render a character
+//render a sprite (or image)
 void
 display_load_sprite(uint8_t origin[]);
 
-//two little helpr routines to control the prog led on the back
-void display_prog_led_enable(void);
-void display_prog_led_disable(void);
+//display the next sprite
+void display_advance_buffer(void);
 
 #endif /* DISPLAY_H_ */
