@@ -25,7 +25,6 @@
 #define RANDOM_H_
 
 void randomize_seed(void);
-void set_seed(unsigned int value);
-unsigned int get_random(unsigned int upper_bound);
+unsigned int get_random(unsigned int max);
 
 #endif /* RANDOM_H_ */

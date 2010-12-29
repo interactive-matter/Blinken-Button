@@ -27,72 +27,25 @@
 
 #include "random.h"
 
-//channel 7 is unused and left floating - it should get enough EMI ;)
-#define ADC_CHANNEL 14
+static uint32_t RandomSeedA = 65537;
+static uint32_t RandomSeedB = 12345;
+
 
 //to randomize zhe seed we read signals from the ADC and use the noise as seed
 void
 randomize_seed(void)
 {
-  unsigned int seed = 0;
-  //switch on adc
-  power_adc_enable();
-
-  //set the channel as input
-  DDRC &= ~_BV(7);
-
-
-  ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // activate adc
-  //use a low prescaler for maximum speed and error
-
-  ADMUX = ADC_CHANNEL; // Kanal waehlen
-  ADMUX |= _BV(6); //use vcc as voltage reference
-
-  ADCSRA |= (1 << ADEN);//enable ADC with dummy conversion
-
-  //we stupidly perform 16 measurements and always use the incorrect last bit
-  uint8_t i;
-  for (i = 0; i < 16; i++)
-    {
-
-      ADCSRA |= (1 << ADSC); // eine ADC-Wandlung
-      while (ADCSRA & (1 << ADSC))
-        {
-          ; // auf Abschluss der Konvertierung warten
-        }
-      seed |= (ADCW & 1);
-      seed <<= 1;
-    }
-
-  ADCSRA &= (unsigned char) ~((1 << ADEN)); // ADC deaktivieren (2)
-  //switch off adc
-  power_adc_disable();
-
-  set_seed(seed);
-
+ 	uint16_t *addr = 0;
+	for (addr = 0; addr < (uint16_t*)0xFFFF; addr++)
+		RandomSeedB += (*addr);
 }
 
-void
-set_seed(unsigned int seed)
-{
-  srand(seed);
-}
 
 unsigned int
-get_random(unsigned int upper_bound)
+get_random(unsigned int max)
 {
-  /* This routine is supposed to be better
-  unsigned int x = (RAND_MAX + 1u) / upper_bound;
-  unsigned int y = x * upper_bound;
-  unsigned int r;
-  do
-    {
-      r = rand();
-    }
-  while (r >= y);
-  return r / x;
-  */
-  //but we still stick to the dumb implementation
-  return rand() % upper_bound;
-
+  	RandomSeedA = 36969 * (RandomSeedA & 65535) + (RandomSeedA >> 16);
+	RandomSeedB = 18000 * (RandomSeedB & 65535) + (RandomSeedB >> 16);
+ 	return ((RandomSeedA << 16) + RandomSeedB) % max;
 }
+
