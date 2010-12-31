@@ -25,6 +25,7 @@
 # PROGRAMMER_PORT ...  the port the programmer is attached to. This is highly 
 #                dependent on your programmer and operating system.
 #                This settings works for my mac
+
 PROGRAMMER = avrispmkII
 PROGRAMMER_PORT = usb
 
