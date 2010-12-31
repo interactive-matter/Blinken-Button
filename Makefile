@@ -25,6 +25,7 @@
 # PROGRAMMER_PORT ...  the port the programmer is attached to. This is highly 
 #                dependent on your programmer and operating system.
 #                This settings works for my mac
+
 PROGRAMMER = avrispmkII
 PROGRAMMER_PORT = usb
 
@@ -40,7 +41,7 @@ PROGRAMMER_PORT = usb
 DEVICE     = atmega168
 CLOCK      = 8000000
 OBJECTS    = main.o core/animation.o core/display.o core/random.o core/state.o flash-content/sprites.o 
-FUSES      = Ulfuse:w:0xe2:m -Uhfuse:w:0xdf:m -Uefuse:w:0x1:m
+FUSES      = -Ulfuse:w:0xe2:m -Uhfuse:w:0xdf:m -Uefuse:w:0x1:m
 
 
 # Tune the lines below only if you know what you are doing:

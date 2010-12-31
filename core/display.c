@@ -189,8 +189,27 @@ display_advance_buffer(void)
 }
 
 /*
+ * Loads the test pattern.
+ * TODO come up with a better test pattern solution!
+ */
+void
+display_load_default_sequence(void)
+{
+  uint8_t default_load_buffer[8] =
+    { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+  display_current_buffer = 0;
+  copy_to_buffer(predefined_sprites[DEFAULT_1], default_load_buffer);
+  display_load_sprite(default_load_buffer);
+  display_current_buffer = 1;
+  copy_to_buffer(predefined_sprites[DEFAULT_2], default_load_buffer);
+  display_load_sprite(default_load_buffer);
+  display_current_buffer = 0;
+}
+
+/*
  * Configures the column timer (Timer 0).
- * it 156.25kHz?
+ * at 156.25kHz?
  * TODO why OCR0A 200?
  */
 void
