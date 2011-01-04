@@ -61,7 +61,13 @@ typedef struct
   PGM_P sprites;
 } _sequence_struct;
 
+//how many sequences do we have?
 #define MAX_SEQUENCE 6
+/*the definition of the sequences as array of _sequence_struct (see above):
+ * First the display speed (lower numbers are faster since it is more a wait timer.
+ * Second the length, how long the animation is shown.
+ * Third the animation.
+ */
 const _sequence_struct sequences[] PROGMEM =
   {
   //the first two sprites are defined twice - to ensure that they are shown more often
