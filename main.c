@@ -55,13 +55,11 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 
-// state manages the triggering of calculations
-// according to Timer 2
-#include "core/state.h"
-// animations.c contains all routines for rendering the animations from single images
-#include "core/animation.h"
 // display.c is responsible for rendering the images on the display.
 #include "core/display.h"
+
+// spi support
+#include "core/spi.h"
 
 /*
  * This is the main routine. The main routine gets executed when the ATmega powers up.
@@ -76,9 +74,14 @@ main(void)
    * CPU components first and power up only those components we need later.
    * So here we switch anything of
    */
-  power_all_disable();
-  //now start the animations
-  animation_init();
+  // TODO: This makes SPI not work...
+  //power_all_disable();
+  
+  // Initialize display
+  display_init();
+  
+  // Initialize SPI
+  spi_init();
 
   /*
    * now we have initialized all components and can now switch to reactive mode.
@@ -92,10 +95,6 @@ main(void)
     */
    for( ; ;)
     {
-     /*
-      * by state_process we check if a new image has to be loaded and call the load routine
-      */
-      state_process();
     }
 }
 
