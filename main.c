@@ -74,8 +74,7 @@ main(void)
    * CPU components first and power up only those components we need later.
    * So here we switch anything of
    */
-  // TODO: This makes SPI not work...
-  //power_all_disable();
+  power_all_disable();
   
   // Initialize display
   display_init();

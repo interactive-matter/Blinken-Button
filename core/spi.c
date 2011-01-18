@@ -1,10 +1,10 @@
-/**
+/*
  * SPI support
  */
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
+#include <avr/power.h>
 
 #include "display.h"
 
@@ -15,6 +15,8 @@
 
 // Sprite buffer
 uint8_t sprite[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+// Buffer counter
 uint8_t i = 0;
 
 /**
@@ -23,6 +25,9 @@ uint8_t i = 0;
 void spi_init(void)
 {
     volatile char IOReg;
+    
+    // Enable SPI module
+    power_spi_enable();
     
     // Set MISO output
     DDRB |= (1<<MISO);
@@ -40,13 +45,14 @@ void spi_init(void)
  */
 ISR(SPI_STC_vect)
 {
-    // Save sprite into buffer
+    // Save row into sprite buffer
     sprite[i++] = SPDR;
     
     if (i == 8) {
         // Sprite completed
         i = 0;
         
+        // Load frame and swap buffers
         display_load_sprite(sprite);
         display_advance_buffer();
     }
