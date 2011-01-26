@@ -208,27 +208,44 @@ display_load_default_sequence(void)
 }
 
 /*
- * Configures the column timer (Timer 0).
- * at 156.25kHz?
- * TODO why OCR0A 200?
+ * Configures the column timer (Timer 0) at 13.9 kHz
+ *
+ * The estimated interrupt frequency
+ *   F_OC = F_CPU/(prescaler*(OCR0A+1))
+ *        = 8,000,000 Hz / (64 * (8+1))
+ *        =  13,889 Hz
+ * results in a 'frame rate' of 13,339/8 = 1,736 FPS.
+ * This _should_ be enough to prevent LED flicker.
+ *
+ * FPS rates below 1,000Hz will _definitely_ lead to POV
+ * flicker effects! Test it for yourself by increasing
+ * OCR0A to e.g. 17 (= 868 FPS, slight POV effects) or 35
+ * (= 434 FPS, strong POV effects when shaking the device)
  */
+
 void
 display_start_column_timer(void)
 {
   power_timer0_enable();
-  //nothing to set on TCCR0A
-  TCCR0A = 0;
-  TCCR0B = _BV(CS01) || _BV(CS00);
+  //setting Timer 0 to CTC mode
+  TCCR0A = (1<<WGM01);
+  //setting prescaler to f_CPU/64
+  TCCR0B = (1<<CS01) | (1<<CS00);
+  //Output Compare Interrupt Enable
   TIMSK0 = _BV(OCIE0A);
-  OCR0A = 200;
+  //setting TOP to 8
+  OCR0A = 8;
+
+
+
+
 }
 
 /*
- * The overflow event for Timer 0.
+ * The output compare match event for Timer 0.
  * This is the heart of the display routine. It is triggered every time Timer 0
  * hits OCR0A as upper limit.
- * The timer interrupt reoutine does the following:
- * - it disables all interrupts to be uninterrupted by other interrupts
+ * The timer interrupt routine does the following:
  * - it renders the next row and increases the row counter
  * - if needed it switches the display buffer
  * - it enables all the interrupts again
@@ -236,8 +253,9 @@ display_start_column_timer(void)
  */
 ISR(TIMER0_COMPA_vect )
 {
-  //we want no other interrupts
-  cli();
+  //we don't need to disable interrupts by ourself, because
+  //inside ISRs interrupts are disabled by default
+
   //set all row drains to high
   PORTB = 0;
   PORTC = 0;
@@ -277,7 +295,8 @@ ISR(TIMER0_COMPA_vect )
           display_status &= ~(DISPLAY_BUFFER_ADVANCE);
         }
     }
-  //now other interrupts are fine
-  sei();
+
+  //neither do we need to enable interrupts, as they will be
+  //automagically be enabled when returning from the ISR
 }
 
