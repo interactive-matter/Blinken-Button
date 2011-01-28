@@ -36,7 +36,7 @@
 #include <string.h>
 
 #include "state.h"
-#include "../sprites.h"
+#include "sprites.h"
 #include "display.h"
 
 /*

@@ -33,9 +33,9 @@
 #include "animations.h"
 #include "sprites.h"
 #include "font.h"
-#include "core/state.h"
-#include "core/random.h"
-#include "core/display.h"
+#include "state.h"
+#include "random.h"
+#include "display.h"
 
 /*
  * The defines the speed text scrolls through the display
