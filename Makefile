@@ -40,7 +40,7 @@ PROGRAMMER_PORT = usb
 
 DEVICE     = atmega168
 CLOCK      = 8000000
-OBJECTS    = main.o core/rendering.o core/display.o core/random.o core/state.o font.o sprites.o 
+OBJECTS    = main.o rendering.o core/display.o core/random.o core/state.o font.o sprites.o 
 FUSES      = -Ulfuse:w:0xe2:m -Uhfuse:w:0xdf:m -Uefuse:w:0x1:m
 
 
