@@ -26,8 +26,8 @@
 #                dependent on your programmer and operating system.
 #                This settings works for my mac
 
-PROGRAMMER = avrispmkII
-PROGRAMMER_PORT = usb
+PROGRAMMER = stk500
+PROGRAMMER_PORT = /dev/ttyUSB0
 
 # This are the hardware settings for the Blinken Buttons for Beginners. There is
 # normally no need tho change these (or anything below) (if you do not change 
@@ -40,7 +40,7 @@ PROGRAMMER_PORT = usb
 
 DEVICE     = atmega168
 CLOCK      = 8000000
-OBJECTS    = main.o core/animation.o core/display.o core/random.o core/state.o flash-content/sprites.o 
+OBJECTS    = main.o core/display.o core/spi.o
 FUSES      = -Ulfuse:w:0xe2:m -Uhfuse:w:0xdf:m -Uefuse:w:0x1:m
 
 

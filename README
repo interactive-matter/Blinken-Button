@@ -1,0 +1,13 @@
+
+    Blinken Button SPI
+    ~~~~~~~~~~~~~~~~~~
+    
+    Adds SPI support to the Blinken Button by Interactive Matter[1].
+    This allows the 8x8 LED display to be controlled by another MCU.
+    
+    The Blinken Button receives frames from an SPI master, which are shown
+    on the display. A frame consists of 8 bytes, each of which represents
+    rows 0 to 7.
+    
+    [1] http://interactive-matter.org/how-to/blinken-button-for-beginners/
+    

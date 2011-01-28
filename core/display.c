@@ -35,9 +35,8 @@
 #include <avr/pgmspace.h>
 #include <string.h>
 
-#include "state.h"
-#include "../flash-content/sprites.h"
 #include "display.h"
+#include "../flash-content/sprites.h"
 
 /*
  * Here we prototype some private functions we only need in this module.
@@ -162,7 +161,6 @@ display_load_sprite(uint8_t origin[])
             }
         }
       //enable the drain for the selected lines
-      //TODO do we still need this
       pd = origin[column];
 
       //save the calculated values to the sprite
@@ -249,7 +247,6 @@ display_start_column_timer(void)
  * - it renders the next row and increases the row counter
  * - if needed it switches the display buffer
  * - it enables all the interrupts again
- * TODO remove test mode
  */
 ISR(TIMER0_COMPA_vect )
 {
