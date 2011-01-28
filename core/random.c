@@ -31,7 +31,11 @@ static uint32_t RandomSeedA = 65537;
 static uint32_t RandomSeedB = 12345;
 
 
-//to randomize zhe seed we read signals from the ADC and use the noise as seed
+/*
+ * To randomize the seed we simply read add up all memory content.
+ * To generate a god randomizity it is useful to do this as early as possible
+ * in the startup.
+ */
 void
 randomize_seed(void)
 {
@@ -40,7 +44,9 @@ randomize_seed(void)
 		RandomSeedB += (*addr);
 }
 
-
+/*
+ * This generates a new random number of maximum 'max'
+ */
 unsigned int
 get_random(unsigned int max)
 {

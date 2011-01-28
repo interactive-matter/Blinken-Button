@@ -24,7 +24,16 @@
 #ifndef RANDOM_H_
 #define RANDOM_H_
 
+/*
+ * To randomize the seed we simply read add up all memory content.
+ * To generate a god randomizity it is useful to do this as early as possible
+ * in the startup.
+ */
 void randomize_seed(void);
+
+/*
+ * This generates a new random number of maximum 'max'
+ */
 unsigned int get_random(unsigned int max);
 
 #endif /* RANDOM_H_ */
