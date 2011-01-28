@@ -36,7 +36,7 @@
 #include <string.h>
 
 #include "state.h"
-#include "sprites.h"
+#include "core-flash-content.h"
 #include "display.h"
 
 /*
@@ -199,10 +199,10 @@ display_load_default_sequence(void)
     { 0, 0, 0, 0, 0, 0, 0, 0 };
 
   display_current_buffer = 0;
-  copy_to_buffer(predefined_sprites[DEFAULT_1], default_load_buffer);
+  copy_to_buffer(default_sprites[0], default_load_buffer);
   display_load_sprite(default_load_buffer);
   display_current_buffer = 1;
-  copy_to_buffer(predefined_sprites[DEFAULT_2], default_load_buffer);
+  copy_to_buffer(default_sprites[1], default_load_buffer);
   display_load_sprite(default_load_buffer);
   display_current_buffer = 0;
 }
@@ -299,4 +299,3 @@ ISR(TIMER0_COMPA_vect )
   //neither do we need to enable interrupts, as they will be
   //automagically be enabled when returning from the ISR
 }
-

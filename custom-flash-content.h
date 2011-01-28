@@ -21,14 +21,33 @@
  *  Created on: 26.01.2010
  */
 
-#ifndef SPRITES_H_
-#define SPRITES_H_
+#ifndef CUSTOM_FLASH_CONTENT_H_
+#define CUSTOM_FLASH_CONTENT_H_
 
-void copy_to_buffer(const prog_uint8_t sprite[8], uint8_t buffer[]);
+//a sequence is a animation + display speed an length
+typedef struct
+{
+  uint8_t display_speed;
+  uint8_t display_length;
+  const prog_uint8_t* sprites;
+} _sequence_struct;
 
+//a buffer for loading messages from flash
+extern char message[];
+//how much messages do we have in total
+extern const uint8_t max_messages;
+//the messages
+extern const PGM_P PROGMEM messages[];
+//how often should we display messages
+extern const uint8_t message_probability;
+
+//how many sequences do we have?
+extern const uint8_t max_sequence;
+
+extern const _sequence_struct sequences[] PROGMEM;
+
+
+//the sprites defined in custom-flash-content.c
 extern const prog_uint8_t predefined_sprites[][8];
 
-#define DEFAULT_1 12
-#define DEFAULT_2 13
-
-#endif /* SPRITES_H_ */
+#endif /* CUSTOM_FLASH_CONTENT_H_ */

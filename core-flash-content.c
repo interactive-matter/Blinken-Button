@@ -24,7 +24,30 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 
-#include "font.h"
+#include "core-flash-content.h"
+
+const prog_uint8_t default_sprites[][8] = {
+  {
+    0x0F,    // ____XXXX  12
+    0x0F,    // ____XXXX
+    0x0F,    // ____XXXX
+    0x0F,    // ____XXXX
+    0xF0,    // XXXX____
+    0xF0,    // XXXX____
+    0xF0,    // XXXX____
+    0xF0,    // XXXX____
+  },
+  {
+    0xF0,    // XXXX____  13
+    0xF0,    // XXXX____
+    0xF0,    // XXXX____
+    0xF0,    // XXXX____
+    0x0F,    // ____XXXX
+    0x0F,    // ____XXXX
+    0x0F,    // ____XXXX
+    0x0F,    // ____XXXX
+  }
+};
 
 const prog_uint8_t font[] = {
   // 3 chars bitmap, 1 char length

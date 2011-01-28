@@ -24,7 +24,16 @@
 #include <avr/pgmspace.h>
 
 #ifndef FONT_H_
-#define FONT_H_
+#define CORE_FLASH_CONTENT_H_
+
+/*
+ * copy_to_buffer
+ * Copies the given sprite from PROGMEM to RAM.
+ */
+#define copy_to_buffer(sprite, buffer) memcpy_P(buffer, sprite, 8)
+
+
+extern const prog_uint8_t default_sprites[][8];
 
 #define MAX_CHARS 59
 #define CHAR_OFFSET 0x20

@@ -22,6 +22,65 @@
  */
 #include <avr/pgmspace.h>
 
+#include "custom-flash-content.h"
+
+//how often should we display messages - bigger values mean
+//less probability to display a message
+const uint8_t message_probability = 10;
+//how many chars has the longest message
+#define MAX_MESSAGE_LENGTH 40
+//a buffer for loading messages from flash
+char message[MAX_MESSAGE_LENGTH];
+
+/*
+ * Here you can define the messages. If you want to have more than three
+ * messages just add another message_0x. But remember to also increase the
+ * total number of messages in max_messages and add it to the array messages.
+ */
+const prog_char message_00[] = "INTERACTIVE-MATTER.ORG";
+const prog_char message_01[] = "SPACE INVADERS BUTTON";
+const prog_char message_02[] = "SPACE INVADERS AGAINST RACISM";
+//how much messages do we have in total (see message_00 _01 ...)
+const uint8_t max_messages = 3;
+//if you define new messages remember to add it here
+const PGM_P PROGMEM messages[] =
+  { message_00, message_01, message_02 };
+
+
+//our animations
+//first number is # sprites
+const prog_uint8_t sprite_0[] =
+  { 2, 0, 1 };
+const prog_uint8_t sprite_1[] =
+  { 2, 2, 3 };
+const prog_uint8_t sprite_2[] =
+  { 2, 4, 5 };
+const prog_uint8_t sprite_3[] =
+  { 8, 14, 15, 16, 11, 11, 16, 15, 14 };
+const prog_uint8_t sprite_4[] =
+  { 7, 8, 9, 10, 11, 10, 9, 8 };
+
+//how many sequences do we have?
+const uint8_t max_sequence = 6;
+/*the definition of the sequences as array of _sequence_struct (see above):
+ * First the display speed (lower numbers are faster since it is more a wait timer.
+ * Second the length, how long the animation is shown.
+ * Third the animation.
+ */
+const _sequence_struct sequences[] PROGMEM =
+  {
+  //the first two sprites are defined twice - to ensure that they are shown more often
+        { 14, 20, sprite_0 },
+        { 14, 20, sprite_1 },
+        { 14, 20, sprite_0 },
+        { 14, 20, sprite_1 },
+        { 3, 5, sprite_3 },
+        { 3, 5, sprite_4 } };
+
+/*
+ * This is the definition of sprites that are usable. The bit pattern on the
+ * display is directly converted to a number and here defined as a number (hex)
+ */
 const prog_uint8_t predefined_sprites[][8] = {
   {
     0x18,    // ___XX___ 0
@@ -254,12 +313,3 @@ const prog_uint8_t predefined_sprites[][8] = {
     0xF9,    // XXXXX__X
   }
 };
-
-/*
- * copy_to_buffer
- * Copies the given sprite from PROGMEM to RAM.
- */
-void copy_to_buffer(const prog_uint8_t sprite[8], uint8_t* buffer) {
-  memcpy_P(buffer, sprite, 8);
-}
-

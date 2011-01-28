@@ -30,9 +30,8 @@
 #include <avr/power.h>
 
 #include "rendering.h"
-#include "animations.h"
-#include "sprites.h"
-#include "font.h"
+#include "core-flash-content.h"
+#include "custom-flash-content.h"
 #include "state.h"
 #include "random.h"
 #include "display.h"
@@ -206,7 +205,7 @@ animation_load_next_sequence(void)
 {
 
   //select the next sequence randomly
-  uint8_t animation_sequence_number = get_random(MAX_SEQUENCE);
+  uint8_t animation_sequence_number = get_random(max_sequence);
   //buffer for loading a sequence (all information for the sequence)
   //like length and so on
   _sequence_struct curr_sequence;
@@ -272,7 +271,7 @@ animation_set_sequence(int8_t start, int8_t end, uint8_t speed)
 void
 animation_load_message(void)
 {
-  uint8_t animation_message_number = get_random(MAX_MESSAGE);
+  uint8_t animation_message_number = get_random(max_messages);
   strcpy_P(message,
       (char*) pgm_read_word(&(messages[animation_message_number])));
 }
@@ -424,7 +423,7 @@ animation_text_render(void)
   else //if we are not displaying a text message
     {
       //according to a random value we decide if we want to display some text
-      if (get_random(MESSAGE_PROBABILITY) == 1)
+      if (get_random(message_probability) == 1)
         {
           animation_load_message();
           animation_display_message(message);
