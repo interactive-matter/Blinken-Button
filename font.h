@@ -29,5 +29,5 @@
 #define MAX_CHARS 59
 #define CHAR_OFFSET 0x20
 
-extern const uint8_t PROGMEM font[];
+extern const prog_uint8_t font[];
 #endif /* FONT_H_ */

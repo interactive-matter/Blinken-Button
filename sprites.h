@@ -26,7 +26,7 @@
 
 void copy_to_buffer(const prog_uint8_t sprite[8], uint8_t buffer[]);
 
-extern const prog_uint8_t PROGMEM predefined_sprites[][8];
+extern const prog_uint8_t predefined_sprites[][8];
 
 #define DEFAULT_1 12
 #define DEFAULT_2 13

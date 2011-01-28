@@ -22,7 +22,7 @@
  */
 #include <avr/pgmspace.h>
 
-const prog_uint8_t PROGMEM predefined_sprites[][8] = {
+const prog_uint8_t predefined_sprites[][8] = {
   {
     0x18,    // ___XX___ 0
     0x3C,    // __XXXX__

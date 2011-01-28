@@ -274,7 +274,7 @@ animation_load_message(void)
 {
   uint8_t animation_message_number = get_random(MAX_MESSAGE);
   strcpy_P(message,
-      (uint8_t*) pgm_read_word(&(messages[animation_message_number])));
+      (char*) pgm_read_word(&(messages[animation_message_number])));
 }
 
 /*

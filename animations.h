@@ -26,39 +26,40 @@
 
 #include <avr/pgmspace.h>
 
-//how many chars has the longest message
-#define MAX_MESSAGE_LENGTH 40
 //how often should we display messages
 #define MESSAGE_PROBABILITY 10
-//how much messages do we have
+//how many chars has the longest message
+#define MAX_MESSAGE_LENGTH 40
+//how much messages do we have in total (see message_00 _01 ...)
 #define MAX_MESSAGE 3
 //and now to the messages
-const prog_char PROGMEM message_00[] PROGMEM = "INTERACTIVE-MATTER.ORG";
-const prog_char PROGMEM message_01[] PROGMEM = "SPACE INVADERS BUTTON";
-const prog_char PROGMEM message_02[] PROGMEM = "SPACE INVADERS AGAINST RACISM";
-PGM_P PROGMEM messages[] =
+const prog_char message_00[] = "INTERACTIVE-MATTER.ORG";
+const prog_char message_01[] = "SPACE INVADERS BUTTON";
+const prog_char message_02[] = "SPACE INVADERS AGAINST RACISM";
+//if you define new messages remember to add it here
+const PGM_P PROGMEM messages[] =
   { message_00, message_01, message_02 };
 //a buffer for loading messages from flash
 char message[MAX_MESSAGE_LENGTH];
 
 //our animations
 //first number is # sprites
-const uint8_t sprite_0[] PROGMEM =
+const prog_uint8_t sprite_0[] =
   { 2, 0, 1 };
-const uint8_t sprite_1[] PROGMEM =
+const prog_uint8_t sprite_1[] =
   { 2, 2, 3 };
-const uint8_t sprite_2[] PROGMEM =
+const prog_uint8_t sprite_2[] =
   { 2, 4, 5 };
-const uint8_t sprite_3[] PROGMEM =
+const prog_uint8_t sprite_3[] =
   { 8, 14, 15, 16, 11, 11, 16, 15, 14 };
-const uint8_t sprite_4[] PROGMEM =
+const prog_uint8_t sprite_4[] =
   { 7, 8, 9, 10, 11, 10, 9, 8 };
 //a sequence is a animation + display speed an length
 typedef struct
 {
   uint8_t display_speed;
   uint8_t display_length;
-  PGM_P sprites;
+  const prog_uint8_t* sprites;
 } _sequence_struct;
 
 //how many sequences do we have?

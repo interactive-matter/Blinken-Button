@@ -26,7 +26,7 @@
 
 #include "font.h"
 
-const uint8_t font[] PROGMEM = {
+const prog_uint8_t font[] = {
   // 3 chars bitmap, 1 char length
    0x00, 0x00, 0x00, 0x01 ,             // 0x20, 32, ' '
    0x17, 0x00, 0x00, 0x01 ,             // 0x21, 33, !
