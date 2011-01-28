@@ -30,7 +30,7 @@
 #include <avr/power.h>
 
 #include "animation.h"
-#include "../flash-content/animations.h"
+#include "../animations.h"
 #include "../sprites.h"
 #include "../font.h"
 #include "state.h"
