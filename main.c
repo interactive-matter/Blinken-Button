@@ -59,7 +59,7 @@
 // according to Timer 2
 #include "core/state.h"
 // animations.c contains all routines for rendering the animations from single images
-#include "core/animation.h"
+#include "core/rendering.h"
 // display.c is responsible for rendering the images on the display.
 #include "core/display.h"
 

@@ -29,7 +29,7 @@
 #include <avr/interrupt.h>
 #include <avr/power.h>
 
-#include "animation.h"
+#include "rendering.h"
 #include "../animations.h"
 #include "../sprites.h"
 #include "../font.h"
