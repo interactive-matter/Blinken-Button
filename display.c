@@ -65,9 +65,7 @@ uint8_t display_current_buffer;
  * For the display we track an additional state:
  *  - is the buffer locked
  *  - should we switch buffers?
- *  TODO: get rid of this ore make it clear!
  */
-
 register uint8_t display_status asm("r3");
 #define DISPLAY_BUFFER_LOCKED _BV(0)
 #define DISPLAY_BUFFER_ADVANCE _BV(1)
@@ -162,7 +160,6 @@ display_load_sprite(uint8_t origin[])
             }
         }
       //enable the drain for the selected lines
-      //TODO do we still need this
       pd = origin[column];
 
       //save the calculated values to the sprite
@@ -190,7 +187,6 @@ display_advance_buffer(void)
 
 /*
  * Loads the test pattern.
- * TODO come up with a better test pattern solution!
  */
 void
 display_load_default_sequence(void)
@@ -249,7 +245,6 @@ display_start_column_timer(void)
  * - it renders the next row and increases the row counter
  * - if needed it switches the display buffer
  * - it enables all the interrupts again
- * TODO remove test mode
  */
 ISR(TIMER0_COMPA_vect )
 {

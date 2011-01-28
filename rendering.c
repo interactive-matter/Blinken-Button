@@ -1,5 +1,5 @@
 /*
- * animation.c
+ * rendering.c
  *
  *  http://interactive-matter.org/
  *
@@ -20,8 +20,13 @@
  *
  *  Created on: 26.01.2010
  *
- *  The animation routines control the
- *  TODO does it control the text mode too?
+ *  The rendering routines control the all the conversion from simple flash
+ *  values to a proper rendereable image.
+ *  For sprites it is easy. Just go through the sequences or select a new
+ *  sequence.
+ *  For texts t is more complicated. You need to render the letters of the
+ *  text using the font and also take the scrolling into consideration.
+ *  This is all done here.
  */
 #include <stdint.h>
 #include <string.h>
@@ -45,7 +50,7 @@
 /*
  * This defines the internal size of the animation buffer.
  * It contains several images of an animation in the main ram.
- * TODO and why? can we get rid of that?
+ * TODO get rid of this!
  */
 #define BUFFER_SIZE 8
 
@@ -454,6 +459,12 @@ animation_clear_buffer(uint8_t buffer_number)
     }
 }
 
+/*
+ * This routine starts the update timer (Timer 1). it is used to switch between
+ * animations. The timer runs at 0,4Hz (it is a 16 bit counter) to switch
+ * smoothly between the animations.
+ * TODO can't we unite those timers - they confuse me
+ */
 void
 animation_start_update_timer(void)
 {
@@ -468,10 +479,7 @@ volatile uint8_t test_row = 0;
 volatile uint8_t test_column=0;
 
 /*
- * This routine starts the update timer (Timer 1). it is used to switch between
- * animations. The timer runs at 0,4Hz (it is a 16 bit counter) to switch
- * smoothly between the animations.
- * TODO can't we unit those timers - they confuse me
+ * And this is the real code for Timer1
  */
 ISR (TIMER1_OVF_vect)
 {
