@@ -1,0 +1,12 @@
+This archive contains the source code for the Blinken Buttons for Beginners.
+For further details check 
+http://interactive-matter.eu/2010/05/blinken-buttons-for-beginners-a-smt-beginners-kit/
+
+The Blinken Button is an 8x8 LED Matrix button you can attach to your clothing.
+To get your own Blinken Button visit http://interactive-matter.eu/shop/blinken-button-for-beginners/
+
+To understand the code start reading the comments in main.c
+
+But if you just want to tinker with different texts just jump to custom-flash-content.c
+
+Have Fun!
