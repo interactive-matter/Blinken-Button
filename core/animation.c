@@ -32,7 +32,7 @@
 #include "animation.h"
 #include "../flash-content/animations.h"
 #include "../flash-content/sprites.h"
-#include "../flash-content/font.h"
+#include "../font.h"
 #include "state.h"
 #include "random.h"
 #include "display.h"
