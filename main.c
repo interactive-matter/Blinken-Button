@@ -26,11 +26,29 @@
  * animations, the texts to display and the font to render the texts to images
  * is stored in the flash memory.
  *
- * The wohle program is cotrolled using timers:
+ * If you want to tinker with the animations, images and textes have a look in
+ * the file 'custom-flash-content.c'. There you can change or create new text
+ * messages, new animations or define new images for the animations.
+ *
+ * If you want to understand how the textes and images are rendered to proper
+ * animations just check the file 'rendering.c'. There you will find all the
+ * magic to select texts and messages and decide when to display what.
+ *
+ * If you want to see how the images that are calculated in 'rendering.c' are
+ * displayed check 'display.c'. There you will find a double buffer, routines
+ * to write to the buffers and routines to display the buffers on the LED matrix
+ *
+ * You can safely ignore the files 'state.c' and 'random.c'
+ * - In 'state.c' is a tiny state machine with some parallel states that can be
+ *   defined programatically. It is used to coordinate the different activities
+ * - In 'random.c' there are just some routines to get better random values than
+ *   the default AVR routines can provide.
+ *
+ * The whole program is controlled using timers:
  * - Timer 0 is responsible for painting the images on the display Ð hence it
  *   is called the 'Display Timer'. The timer controls the rendering of the
- *   single rows of the display. It cycles thorugh row 0 to 7, switches the
- *   row on and enables the correct Leds. By cycling thrugh this sequence really
+ *   single rows of the display. It cycles through row 0 to 7, switches the
+ *   row on and enables the correct LEDs. By cycling through this sequence really
  *   fast the human eye assembles all those rows to a complete image
  * - Timer 2 is responsible for building animations from single images.
  *   It controls the timing when the displayed image is switched and when a new
@@ -39,13 +57,11 @@
  * The main loop is implemented using so called states. Since the main loop is completely
  * controlled  by Timer 2 it has a 'state' which is activated when a new image is displayed
  * an the net animation needs to be loaded.
- * Therfore you will only find the cryptic 'process_state' in the main reoutine.
+ * Therefore you will only find the cryptic 'process_state' in the main routine.
  */
 
 
-/*
- * sometimes AVR Eclipse gets the frequency wrong, so I need t set it here fixed
- */
+//sometimes AVR Eclipse gets the frequency wrong, so I need t set it here fixed
 #define F_CPU 8000000
 
 #include <avr/io.h>
