@@ -92,7 +92,7 @@ typedef struct
 } display_line;
 
 /*
- * This is the double bugffer for the images:
+ * This is the double buffer for the images:
  * 2 Buffers
  * each 8 rows.
  */
@@ -118,9 +118,9 @@ display_init(void)
  * This routines loads an 8x8 bit matrix (8 bytes) into the internal buffer in
  * the format of the  display struct. The display struct contains all port
  * settings to increase the render speed.
- * The result is allways written into the unused buffer.
- * While loading it is converted to direct bits for the ports. The unmber of
- * activated bits (=LEDs) is coounte to enable some dot correction.
+ * The result is always written into the unused buffer.
+ * While loading it is converted to direct bits for the ports. The number of
+ * activated bits (=LEDs) is counted to enable some dot correction.
  */
 void
 display_load_sprite(uint8_t origin[])
@@ -174,7 +174,7 @@ display_load_sprite(uint8_t origin[])
 /*
  * Switch buffers.
  * This enables the rendering of the previously unused buffer (hopefully with
- * a new image) and frees the previuosly rendered buffer for writing to it.
+ * a new image) and frees the previously rendered buffer for writing to it.
  * The switching of the buffers is done by the display timer. Since only the
  * display timer knows when it does not need the buffer any longer.
  */

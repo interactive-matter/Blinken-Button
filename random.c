@@ -15,7 +15,7 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Blinken Button.  If not, see <http://www.gnu.org/licenses/>.
  *
  *
  *  Created on: 26.01.2010
@@ -33,7 +33,7 @@ static uint32_t RandomSeedB = 12345;
 
 /*
  * To randomize the seed we simply read add up all memory content.
- * To generate a god randomizity it is useful to do this as early as possible
+ * To generate a god randomness it is useful to do this as early as possible
  * in the startup.
  */
 void

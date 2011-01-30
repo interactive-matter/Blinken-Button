@@ -21,7 +21,7 @@
  *  Created on: 26.01.2010
  *
  *  The rendering routines control the all the conversion from simple flash
- *  values to a proper rendereable image.
+ *  values to a proper renderable image.
  *  For sprites it is easy. Just go through the sequences or select a new
  *  sequence.
  *  For texts t is more complicated. You need to render the letters of the
@@ -44,7 +44,7 @@
 /*
  * The defines the speed text scrolls through the display
  * Increase for slower scrolling, decrease for faster scrolling
- * TOSO this is a wait time - is there a way to rework this?
+ * TODO this is a wait time - is there a way to rework this?
  */
 #define TEXT_SCROLL_SPEED 2
 /*
@@ -164,7 +164,7 @@ animation_end_display_message(void);
 //do everything to render the actual text
 void
 animation_text_render(void);
-//load the next animation sequence fro flash
+//load the next animation sequence from flash
 void
 animation_load_next_sequence(void);
 //load the next sprite from flash memory
@@ -173,7 +173,7 @@ animation_load_next_sprite(void);
 
 /*
  * This functions set up everything for the animation routine. It needs to be
- * calles before the 'big' loop routine kicks in.
+ * called before the 'big' loop routine kicks in.
  */
 void
 animation_init(void)
@@ -246,8 +246,8 @@ animation_load_next_sprite(void)
 
 /*
  * This routine sets the current sequence.
- *  start is in respect ot the internal buffer
- *  end dito
+ *  start is in respect of the internal buffer
+ *  end as well
  *  speed is the wait time for the sprites - and by that controlling the speed
  *   of the animation
  */
@@ -508,7 +508,7 @@ ISR (TIMER1_OVF_vect)
 
 /*
  * This is the 'animation timer' it switches between the different images of
- * the animation to produce the uhm - animation. It runs at 30Hz
+ * the animation to produce the animation sequence. It runs at 30Hz
  */
 void
 animation_start_animation_timer(void)

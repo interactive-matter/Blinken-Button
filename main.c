@@ -26,11 +26,11 @@
  * animations, the texts to display and the font to render the texts to images
  * is stored in the flash memory.
  *
- * If you want to tinker with the animations, images and textes have a look in
+ * If you want to tinker with the animations, images and texts have a look in
  * the file 'custom-flash-content.c'. There you can change or create new text
  * messages, new animations or define new images for the animations.
  *
- * If you want to understand how the textes and images are rendered to proper
+ * If you want to understand how text and images are rendered to proper
  * animations just check the file 'rendering.c'. There you will find all the
  * magic to select texts and messages and decide when to display what.
  *
