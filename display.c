@@ -209,7 +209,7 @@ display_load_default_sequence(void)
  * The estimated interrupt frequency
  *   F_OC = F_CPU/(prescaler*(OCR0A+1))
  *        = 8,000,000 Hz / (64 * (8+1))
- *        =  13,889 Hz
+ *        =  13,889 Hz (~14kHz)
  * results in a 'frame rate' of 13,339/8 = 1,736 FPS.
  * This _should_ be enough to prevent LED flicker.
  *
