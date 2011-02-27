@@ -168,7 +168,7 @@ display_load_sprite(uint8_t origin[])
           pb |= _BV(row) >> 6;
         }
       //calculate the number of active bits
-      //this is needed by the dot correction in ISR(TIMER0_COMPA_vect )
+      //this is needed by the dot correction in display_render_row
       display_buffer[number][row].num_bit = 0;
       for (int i = 0; i < 8; i++)
         {
@@ -264,7 +264,7 @@ display_start_row_timer(void)
  * - if needed it switches the display buffer
  * - it enables all the interrupts again
  */
-ISR(TIMER0_COMPA_vect )
+void display_render_row(void)
 {
   //we don't need to disable interrupts by ourself, because
   //inside ISRs interrupts are disabled by default

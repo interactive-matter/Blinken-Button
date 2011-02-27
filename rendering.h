@@ -33,5 +33,10 @@ void animation_init(void);
 void animation_display_message(char* message);
 //animate a sequence of sprites (images) to form an animation
 void animation_set_sequence(int8_t start, int8_t end, uint8_t speed);
+//the routine for the animation timer to change animations & display texts
+void animation_switch_sprite(void);
+//the routine to switch between different animations & texts - used by the update timer
+void aimation_update(void);
+
 
 #endif /* ANIMATION_H_ */

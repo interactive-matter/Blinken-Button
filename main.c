@@ -81,10 +81,8 @@
  * Therefore you will only find the cryptic 'process_state' in the main routine.
  */
 
-
 //sometimes AVR Eclipse gets the frequency wrong, so I need t set it here fixed
 #define F_CPU 8000000
-
 
 //include the definitions for our chip, like pins, ports & so on
 #include <avr/io.h>
@@ -126,17 +124,31 @@ main(void)
    * The interrupts are needed to schedule our program activities according to
    * the timers - for which we are using timer overflow interrupts.
    */
-   sei();
+  sei();
 
-   /*
-    * Now we can switch to the main loop and loop until the power is switched off
-    */
-   for( ; ;)
+  /*
+   * Now we can switch to the main loop and loop until the power is switched off
+   */
+  for (;;)
     {
-     /*
-      * by state_process we check if a new image has to be loaded and call the load routine
-      */
+      /*
+       * by state_process we check if a new image has to be loaded and call the load routine
+       */
       state_process();
     }
 }
 
+ISR(TIMER0_COMPA_vect )
+{
+  display_render_row();
+}
+
+ISR (TIMER1_OVF_vect)
+{
+  aimation_update();
+}
+
+ISR(TIMER2_OVF_vect)
+{
+  animation_switch_sprite();
+}
