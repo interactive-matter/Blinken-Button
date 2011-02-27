@@ -1,8 +1,11 @@
 /*
  * BlinkenButton
- * font.c
+ * core-flash-content.c
  *
- *  http://interactive-matter.org/
+ * This file contains animations you probably don't want to change,
+ * the font to render the text.
+ *
+ *  http://interactive-matter.eu/
  *
  *  This file is part of BlinkenButton.
  *
@@ -21,9 +24,13 @@
  *  Created on: 28.01.2011
  *      Author: Marcus, Interactive Matter
  */
+//include the definitions for our chip, like pins, ports & so on
 #include <avr/io.h>
+//since we define stuff for the flash memory we need the routines and definitions
+//for the flash
 #include <avr/pgmspace.h>
 
+//include our own definitions
 #include "core-flash-content.h"
 
 const prog_uint8_t default_sprites[][8] = {

@@ -1,7 +1,10 @@
 /*
  * display.c
  *
- *  http://interactive-matter.org/
+ *  http://interactive-matter.eu/
+ *
+ * This file contains routines to display images on the display. The low level
+ * display driver stuff like going through rows, mapping images.
  *
  *  This file is part of Blinken Button.
  *
@@ -29,14 +32,22 @@
  *  While loading a sprite from an 8 byte array (each byte representing a row)
  *  it gets converted to the port values to ensure a fast computation.
  */
+//include the definitions for our chip, like pins, ports & so on
 #include <avr/io.h>
+//we are using interrupts & timers as schedule - here we have the def. of the
+//interrupt routines and names
 #include <avr/interrupt.h>
+//we power up & down chip components as needed, here are the functions to do this
 #include <avr/power.h>
+//since we are using stuff for the flash memory we need the routines and
+//definitions for the flash
 #include <avr/pgmspace.h>
-#include <string.h>
 
+//we are using states to track activity
 #include "state.h"
+//we need some basic definitions for fonts & default sprites
 #include "core-flash-content.h"
+//and we need our own definitions
 #include "display.h"
 
 /*

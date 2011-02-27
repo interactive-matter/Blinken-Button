@@ -1,7 +1,7 @@
 /*
  * random.h
  *
- *  http://interactive-matter.org/
+ *  http://interactive-matter.eu/
  *
  *  This file is part of Blinken Button.
  *

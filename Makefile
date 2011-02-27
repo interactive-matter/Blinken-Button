@@ -1,6 +1,6 @@
 # Name: Makefile
 # Author: Marcus Nowotny
-#  http://interactive-matter.org/
+#  http://interactive-matter.eu/
 #
 #  This file is part of Blinken Button.
 #

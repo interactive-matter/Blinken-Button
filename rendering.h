@@ -1,7 +1,10 @@
 /*
- * animation.h
+ * rendering.h
  *
- *  http://interactive-matter.org/
+ * This file contains all the stuff needed to animate the animations and
+ * display the text. here are the calculations and update
+ *
+ *  http://interactive-matter.eu/
  *
  *  This file is part of Blinken Button.
  *
@@ -28,6 +31,7 @@
 void animation_init(void);
 //render text
 void animation_display_message(char* message);
+//animate a sequence of sprites (images) to form an animation
 void animation_set_sequence(int8_t start, int8_t end, uint8_t speed);
 
 #endif /* ANIMATION_H_ */

@@ -1,7 +1,7 @@
 /*
- * font.h
+ * core-flash-content.h
  *
- *  http://interactive-matter.org/
+ *  http://interactive-matter.eu/
  *
  *  This file is part of Blinken Button.
  *
@@ -20,8 +20,6 @@
  *
  *  Created on: 26.01.2010
  */
-#include <avr/io.h>
-#include <avr/pgmspace.h>
 
 #ifndef FONT_H_
 #define CORE_FLASH_CONTENT_H_
@@ -32,10 +30,12 @@
  */
 #define copy_to_buffer(sprite, buffer) memcpy_P(buffer, sprite, 8)
 
-
+/*
+ * The default sprites which are always present as fallback
+ */
 extern const prog_uint8_t default_sprites[][8];
-
-#define MAX_CHARS 59
+//where does the first character of the font start. The ASCII number - CHAR_OFFSET
+//is the index in the font
 #define CHAR_OFFSET 0x20
 
 extern const prog_uint8_t font[];

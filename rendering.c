@@ -1,7 +1,7 @@
 /*
  * rendering.c
  *
- *  http://interactive-matter.org/
+ *  http://interactive-matter.eu/
  *
  *  This file is part of Blinken Button.
  *
@@ -28,17 +28,27 @@
  *  text using the font and also take the scrolling into consideration.
  *  This is all done here.
  */
-#include <stdint.h>
-#include <string.h>
+//we are using interrupts & timers as schedule - here we have the def. of the
+//interrupt routines and names
 #include <avr/pgmspace.h>
+//we are using interrupts & timers as schedule - here we have the def. of the
+//interrupt routines and names
 #include <avr/interrupt.h>
+//we power up & down chip components as needed, here are the functions to do this
 #include <avr/power.h>
+#include <string.h>
 
+//we need our own definitions
 #include "rendering.h"
+//we need the font & default sprites
 #include "core-flash-content.h"
+//and we need the texts and animations
 #include "custom-flash-content.h"
+//we are using states to track activities
 #include "state.h"
+//and we randomly select what to do
 #include "random.h"
+//and we need our display
 #include "display.h"
 
 /*

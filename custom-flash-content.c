@@ -1,7 +1,10 @@
 /*
- * sprites.c
+ * custom-flash-content.c
  *
- *  http://interactive-matter.org/
+ * This file contains the definition of the various images, animations
+ * & texts for the Blinken Button
+ *
+ *  http://interactive-matter.eu/
  *
  *  This file is part of Blinken Button.
  *
@@ -20,6 +23,8 @@
  *
  *  Created on: 26.01.2010
  */
+//since we define stuff for the flash memory we need the routines and definitions
+//for the flash
 #include <avr/pgmspace.h>
 
 #include "custom-flash-content.h"

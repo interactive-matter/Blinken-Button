@@ -1,7 +1,7 @@
 /*
  * state.c
  *
- *  http://interactive-matter.org/
+ *  http://interactive-matter.eu/
  *
  *  This file is part of Blinken Button.
  *
@@ -20,7 +20,9 @@
  *
  *  Created on: 26.01.2010
  */
+//include the definitions for our chip, like pins, ports & so on
 #include <stdio.h>
+//we need some special register and tool definitions
 #include <avr/sfr_defs.h>
 
 #include "state.h"

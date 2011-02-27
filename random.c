@@ -1,7 +1,7 @@
 /*
  * random.c
  *
- *  http://interactive-matter.org/
+ *  http://interactive-matter.eu/
  *
  *  This file is part of Blinken Button.
  *
@@ -20,11 +20,10 @@
  *
  *  Created on: 26.01.2010
  */
+//include the definitions for our chip, like pins, ports & so on
 #include <stdio.h>
-#include <stdlib.h>
-#include <avr/io.h>
-#include <avr/power.h>
 
+//include our own definitions
 #include "random.h"
 
 static uint32_t RandomSeedA = 65537;
