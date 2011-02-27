@@ -59,23 +59,29 @@
  * configure & start the main render timer - Timer 0
  */
 void
-display_start_column_timer(void);
+display_start_row_timer(void);
 
 /*
- * the current column, which is rendered. It is stored in a register
+ * the current row, which is rendered. It is stored in a register
  * to ensure a fast update of the value - since it will get updated
  * pretty often.
+ * Like all variables this is initialized with value 0
+ * see http://www.nongnu.org/avr-libc/user-manual/FAQ.html#faq_regbind
  */
-register uint8_t display_curr_column asm("r2");
+register uint8_t display_curr_row asm("r2");
 
 /*
  * Which of the buffers is currently displayed 0 or 1
+ * Like all variables this is initialized with value 0
  */
 uint8_t display_current_buffer;
 /*
  * For the display we track an additional state:
  *  - is the buffer locked
  *  - should we switch buffers?
+ * This value is often needed and often updated - so we store it in a register
+ * too for faster access.
+ * Like all variables this is initialized with value 0
  */
 register uint8_t display_status asm("r3");
 #define DISPLAY_BUFFER_LOCKED _BV(0)
@@ -117,12 +123,12 @@ void
 display_init(void)
 {
   //set all unused pins as inputs & and all display pins as output
-  DDRB = 0x3;
-  DDRC = 0x3f;
-  DDRD = 0xff;
+  DDRB = 0x3; //this enables PCB0 & PCB1 as output
+  DDRC = 0x3f; //this enables a C pins as outputs, except PCC7 & PCC8
+  DDRD = 0xff; //all B pins are outputs too
 
   //kick off the display timers to start rendering
-  display_start_column_timer();
+  display_start_row_timer();
 }
 
 /*
@@ -141,42 +147,43 @@ display_load_sprite(uint8_t origin[])
   //lock the buffer to signal the display to wait with switching display buffers
   //by that we got enough time to completely prepare the unused buffer.
   display_status |= DISPLAY_BUFFER_LOCKED;
-  uint8_t column;
-  for (column = 0; column < 8; column++)
+  uint8_t row;
+  for (row = 0; row < 8; row++)
     {
       //first we set all pins to low
       uint8_t pb = 0;
       uint8_t pc = 0;
       uint8_t pd = 0;
 
-      //select the correct column
-      //this will switch on the column transistor
+      //select the correct row
+      //this will switch on the row transistor
       //bits 0 to 5 are set on the port c, bit 6-8
       //is set on port c.
-      if (column < 6)
+      if (row < 6)
         {
-          pc |= _BV(column);
+          pc |= _BV(row);
         }
       else
         {
-          pb |= _BV(column) >> 6;
+          pb |= _BV(row) >> 6;
         }
       //calculate the number of active bits
-      display_buffer[number][column].num_bit = 0;
+      //this is needed by the dot correction in ISR(TIMER0_COMPA_vect )
+      display_buffer[number][row].num_bit = 0;
       for (int i = 0; i < 8; i++)
         {
-          if (origin[column] & _BV(i))
+          if (origin[row] & _BV(i))
             {
-              display_buffer[number][column].num_bit++;
+              display_buffer[number][row].num_bit++;
             }
         }
       //enable the drain for the selected lines
-      pd = origin[column];
+      pd = origin[row];
 
       //save the calculated values to the sprite
-      display_buffer[number][column].pb = pb;
-      display_buffer[number][column].pc = pc;
-      display_buffer[number][column].pd = pd;
+      display_buffer[number][row].pb = pb;
+      display_buffer[number][row].pc = pc;
+      display_buffer[number][row].pd = pd;
     }
   //unlock the buffer
   display_status &= ~(DISPLAY_BUFFER_LOCKED);
@@ -215,7 +222,7 @@ display_load_default_sequence(void)
 }
 
 /*
- * Configures the column timer (Timer 0) at 13.9 kHz
+ * Configures the row timer (Timer 0) at 13.9 kHz
  *
  * The estimated interrupt frequency
  *   F_OC = F_CPU/(prescaler*(OCR0A+1))
@@ -231,7 +238,7 @@ display_load_default_sequence(void)
  */
 
 void
-display_start_column_timer(void)
+display_start_row_timer(void)
 {
   power_timer0_enable();
   //setting Timer 0 to CTC mode
@@ -262,15 +269,15 @@ ISR(TIMER0_COMPA_vect )
   //we don't need to disable interrupts by ourself, because
   //inside ISRs interrupts are disabled by default
 
-  //set all row drains to high
+  //set all pins to 0 (switching everything off)
   PORTB = 0;
   PORTC = 0;
   PORTD = 0;
   //we strip the first two bits - they are for dimming
   //TODO do we get an 2 bit resolution too?
-  uint8_t display_column = display_curr_column & 7;
-  if ((display_curr_column & 8)
-      && !(display_buffer[display_current_buffer][display_column].num_bit & 0xFC))
+  uint8_t display_row = display_curr_row & 7;
+  if ((display_curr_row & 8)
+      && !(display_buffer[display_current_buffer][display_row].num_bit & 0xFC))
     {
       //do nothing - disable
       ;
@@ -280,19 +287,19 @@ ISR(TIMER0_COMPA_vect )
       //the set the ports line still off
       PORTB = 0;
       PORTC = 0;
-      PORTD = display_buffer[display_current_buffer][display_column].pd;
+      PORTD = display_buffer[display_current_buffer][display_row].pd;
       //the set the ports line enable
-      PORTB = display_buffer[display_current_buffer][display_column].pb;
-      PORTC = display_buffer[display_current_buffer][display_column].pc;
+      PORTB = display_buffer[display_current_buffer][display_row].pb;
+      PORTC = display_buffer[display_current_buffer][display_row].pc;
     }
 
   //mask to max 8 + 2 dimming bits
-  display_curr_column++;
-  display_curr_column &= 0x1f;
+  display_curr_row++;
+  display_curr_row &= 0x1f;
 
-  if (display_curr_column == 0)
+  if (display_curr_row == 0)
     {
-      //if we reached the last column (and wrap) & we should advance to the next sprite display the next sprite
+      //if we reached the last row (and wrap) & we should advance to the next sprite display the next sprite
       if ((display_status & (DISPLAY_BUFFER_LOCKED | DISPLAY_BUFFER_ADVANCE))
           == DISPLAY_BUFFER_ADVANCE)
         {

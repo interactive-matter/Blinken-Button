@@ -3,10 +3,21 @@ For further details check
 http://interactive-matter.eu/2010/05/blinken-buttons-for-beginners-a-smt-beginners-kit/
 
 The Blinken Button is an 8x8 LED Matrix button you can attach to your clothing.
-To get your own Blinken Button visit http://interactive-matter.eu/shop/blinken-button-for-beginners/
+To get your own Blinken Button visit 
+http://interactive-matter.eu/shop/blinken-button-for-beginners/
 
 To understand the code start reading the comments in main.c
 
 But if you just want to tinker with different texts just jump to custom-flash-content.c
+
+You can use the provided Makgefile to compile & install the Blinken Button code
+on your Blinken Button.
+Ensure that you set your programmer & port in Makefile
+
+make complies & links the source files
+make install installs the program and sets the fuses to the correct values
+make flahs just installs the programm
+make fuse just sets the fuses to the correct values
+make clean removes all make artefacts from this directory
 
 Have Fun!

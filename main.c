@@ -113,7 +113,7 @@ main(void)
   /*
    * Even though the LEDs waste a lot of power it is good practice to use to disable all
    * CPU components first and power up only those components we need later.
-   * So here we switch anything of
+   * So here we switch anything of like UART, ADC, timers and so on.
    */
   power_all_disable();
   //now start the animations
@@ -123,6 +123,8 @@ main(void)
    * now we have initialized all components and can now switch to reactive mode.
    * We enable all interrupts globally. By that the selected interrupts start
    * triggering the interrupt routines.
+   * The interrupts are needed to schedule our program activities according to
+   * the timers - for which we are using timer overflow interrupts.
    */
    sei();
 

@@ -32,8 +32,12 @@ static uint32_t RandomSeedB = 12345;
 
 /*
  * To randomize the seed we simply read add up all memory content.
- * To generate a god randomness it is useful to do this as early as possible
- * in the startup.
+ * This is no very good random routine. I would not use it for crypto stuff
+ * (where you need real randomness) but the memory content is random enough to
+ * start with a new animation each time.
+ * To generate a good randomness it is useful to do this as early as possible
+ * in the startup. Since after startup some bits in the memory can be flipped
+ * by accident.
  */
 void
 randomize_seed(void)
