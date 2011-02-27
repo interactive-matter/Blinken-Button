@@ -138,16 +138,19 @@ main(void)
     }
 }
 
+//timer 0 controls the row rendering
 ISR(TIMER0_COMPA_vect )
 {
   display_render_row();
 }
 
+//timer 1 is used to decide what to display
 ISR (TIMER1_OVF_vect)
 {
   aimation_update();
 }
 
+//timer 2 is used to switch between the different images of an animation or text
 ISR(TIMER2_OVF_vect)
 {
   animation_switch_sprite();
