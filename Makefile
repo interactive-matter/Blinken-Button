@@ -38,7 +38,7 @@ PROGRAMMER_PORT = usb
 #                usually the same as the list of source files with suffix ".o".
 # FUSES ........ Parameters for avrdude to flash the fuses appropriately.
 
-DEVICE     = atmega168
+DEVICE     = ATMEGA328P
 CLOCK      = 8000000
 OBJECTS    = main.o rendering.o display.o random.o state.o core-flash-content.o custom-flash-content.o 
 FUSES      = -Ulfuse:w:0xe2:m -Uhfuse:w:0xdf:m -Uefuse:w:0x1:m
