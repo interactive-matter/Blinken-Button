@@ -17,3 +17,8 @@ Debug/*
 *.out.map
 *.elf
 *.hex
+
+#ignore all eagle backup files
+
+*.b#?
+*.s#?
