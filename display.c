@@ -123,9 +123,9 @@ void
 display_init(void)
 {
   //set all unused pins as inputs & and all display pins as output
-  DDRB = 0x3; //this enables PCB0 & PCB1 as output
-  DDRC = 0x3f; //this enables a C pins as outputs, except PCC7 & PCC8
-  DDRD = 0xff; //all B pins are outputs too
+  DDRB = _BV(0) | _BV(1) | _BV(2) | _BV(3) | _BV(4);
+  DDRC = _BV(1) | _BV(2) | _BV(3) | _BV(4) | _BV(5);
+  DDRD = _BV(2) | _BV(3) | _BV(4) | _BV(5) | _BV(6) | _BV(7);
 
   //kick off the display timers to start rendering
   display_start_row_timer();
@@ -155,30 +155,78 @@ display_load_sprite(uint8_t origin[])
       uint8_t pc = 0;
       uint8_t pd = 0;
 
-      //select the correct row
-      //this will switch on the row transistor
-      //bits 0 to 5 are set on the port c, bit 6-8
-      //is set on port c.
-      if (row < 6)
+      //select the correct column
+      //this will switch on the column transistor
+      switch (column)
         {
-          pc |= _BV(row);
-        }
-      else
-        {
-          pb |= _BV(row) >> 6;
-        }
-      //calculate the number of active bits
-      //this is needed by the dot correction in display_render_row
-      display_buffer[number][row].num_bit = 0;
-      for (int i = 0; i < 8; i++)
-        {
-          if (origin[row] & _BV(i))
-            {
-              display_buffer[number][row].num_bit++;
-            }
-        }
+      case 0:
+        pc |= _BV(5);
+        break;
+      case 1:
+        pd |= _BV(6);
+        break;
+      case 2:
+        pb |= _BV(0);
+        break;
+      case 3:
+        pc |= _BV(2);
+        break;
+      case 4:
+        pb |= _BV(2);
+        break;
+      case 5:
+        pc |= _BV(3);
+        break;
+      case 6:
+        pd |= _BV(3);
+        break;
+      case 7:
+        pd |= _BV(4);
+        break;
+        };
+
+      sprite[number][column].num_bit = 0;
       //enable the drain for the selected lines
-      pd = origin[row];
+     if (origin[0] & _BV(column))
+        {
+          pc &= ~_BV(1);
+          sprite[number][column].num_bit++;
+        }
+      if (origin[1] & _BV(column))
+        {
+          pd &= ~_BV(2);
+          sprite[number][column].num_bit++;
+        }
+      if (origin[2] & _BV(column))
+        {
+          pb &= ~_BV(4);
+          sprite[number][column].num_bit++;
+        }
+      if (origin[3] & _BV(column))
+        {
+          pc &= ~_BV(4);
+          sprite[number][column].num_bit++;
+        }
+      if (origin[4] & _BV(column))
+        {
+          pd &= ~_BV(5);
+          sprite[number][column].num_bit++;
+        }
+      if (origin[5] & _BV(column))
+        {
+          pb &= ~_BV(3);
+          sprite[number][column].num_bit++;
+        }
+      if (origin[6] & _BV(column))
+        {
+          pd &= ~_BV(7);
+          sprite[number][column].num_bit++;
+        }
+      if (origin[7] & _BV(column))
+        {
+          pb &= ~_BV(1);
+          sprite[number][column].num_bit++;
+        }
 
       //save the calculated values to the sprite
       display_buffer[number][row].pb = pb;
